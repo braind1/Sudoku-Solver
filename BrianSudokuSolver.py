@@ -173,10 +173,15 @@ class Grid:
 
     # define a function to solve the sudoku
     def simple_solve(self):
+        # while cells are still unsolved
         while self.number_unsolved() > 0:
+            # generate the candidates list for all the cells
             self.full_grid_candidates()
+            # promote all the single candidates to solutions
             self.solution_promote()
-        self.solution_print()
+            # print the resultant board
+            self.solution_print()
+        # at the end, check whether the solved solution matches the given solution, and print the output
         print(self.solve_check())
 
     # define a function that checks whether the solved solution is the same as the given solution
@@ -211,6 +216,17 @@ class Grid:
                 self.cells[cell_of_interest].candidates = [self.cells[cell_of_interest].candidates[candidate]]
             # if the candidate was found, continue the search
 
+    # create a test solve function that only repeats the simple algorithm a few times
+    def test_solve(self):
+        # repeat the simple solve algorithm 10 times
+        for a in range(10):
+            # generate the candidates list for all the cells
+            self.full_grid_candidates()
+            # promote all the single candidates to solutions
+            self.solution_promote()
+            # print the resultant board
+            self.solution_print()
+
 
 game1 = "004300209005009001070060043006002087190007400050083000600000105003508690042910300"
 game1_solution = "864371259325849761971265843436192587198657432257483916689734125713528694542916378"
@@ -243,12 +259,24 @@ game2_solution = "I don't have a solution yet"
 # grid.solve_check()
 
 # instantiate the more difficult sudoku
-med_grid = Grid(game2, game2_solution)
+# med_grid = Grid(game2, game2_solution)
 # get the full candidates list for cell 68
-med_grid.full_candidate_modify(68)
+# med_grid.full_candidate_modify(68)
 # get the full candidates list for cell 69
-med_grid.full_candidate_modify(69)
+# med_grid.full_candidate_modify(69)
 # attempt the lone candidate find with cell 68 in the medium grid
-med_grid.lone_candidate_full(68, 69)
+# med_grid.lone_candidate_full(68, 69)
 # print the candidates for cell 68
-print(med_grid.cells[68].candidates)
+# print(med_grid.cells[68].candidates)
+
+# test medium grid
+test_game = "070410000020060085500008000000000703830050006005090208900670530600000000050831600"
+test_game_solution = "Not sure what the solution is"
+test_grid = Grid(test_game, test_game_solution)
+test_grid.test_solve()
+print(test_grid.cells[74].candidates)
+print(test_grid.cells[79].candidates)
+print(test_grid.cells[80].candidates)
+# print(test_grid.cells[70].candidates)
+# print(test_grid.cells[71].candidates)
+# print(test_grid.cells[26].candidates)
