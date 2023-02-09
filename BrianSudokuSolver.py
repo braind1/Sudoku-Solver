@@ -191,16 +191,16 @@ class Grid:
             return False
 
     # define a function that takes an instance of a cell, a single candidate index, and a test cell and checks if the candidate is in the test cell
-    def lone_candidate(self, cell_of_interest: int, candidate_index: int, test_cell: Cell):
+    def lone_candidate(self, cell_of_interest: int, candidate_index: int, test_cell: int) -> bool:
         # checks if the candidate of the cell of interest is in the test cell's candidate list
-        if self.cells[cell_of_interest].candidates[candidate_index] in test_cell.candidates:
+        if self.cells[cell_of_interest].candidates[candidate_index] in self.cells[test_cell].candidates:
             # if the candidate is in the test cell's candidate, return true
             return True
         else:
             return False
 
     # define a function that repeats the lone candidate search for all candidates in the test cell given
-    def lone_candidate_full(self, cell_of_interest: int, test_cell: Cell):
+    def lone_candidate_full(self, cell_of_interest: int, test_cell: int):
         # iterates the lone candidate search for all the candidates of the test cell
         for candidate in range(len(self.cells[cell_of_interest].candidates)):
             # assigns a boolean variable that is true if the candidate is not a lone candidate
@@ -217,9 +217,14 @@ game1_solution = "86437125932584976197126584343619258719865743225748391668973412
 
 # game 2 is harder, cannot be solved using the basic technique
 game2 = "009070035510040206700006001600007093023010000001000500800000049190000058007000600"
+game2_solution = "I don't have a solution yet"
 
 # instantiate the only instance of the grid
-grid = Grid(game1, game1_solution)
+# simple_grid = Grid(game1, game1_solution)
+# solves the full simple grid
+# simple_grid.simple_solve()
+
+# all tests used to check simple solve algorithm
 # print(grid.cells[5].position, grid.cells[5].block, grid.cells[5].given)
 # grid.candidate_check(0, grid.cells[2])
 # print(grid.cells[0].candidates)
@@ -232,8 +237,18 @@ grid = Grid(game1, game1_solution)
 # grid.solution_print()
 # print(grid.cells[0].solution)
 # print(grid.cells[1].candidates)
-grid.simple_solve()
 # print(type(grid.cells[0].solution))
 # print(grid.full_solution)
 # print(type(grid.full_solution[0]))
 # grid.solve_check()
+
+# instantiate the more difficult sudoku
+med_grid = Grid(game2, game2_solution)
+# get the full candidates list for cell 68
+med_grid.full_candidate_modify(68)
+# get the full candidates list for cell 69
+med_grid.full_candidate_modify(69)
+# attempt the lone candidate find with cell 68 in the medium grid
+med_grid.lone_candidate_full(68, 69)
+# print the candidates for cell 68
+print(med_grid.cells[68].candidates)
