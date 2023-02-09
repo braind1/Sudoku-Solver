@@ -217,7 +217,7 @@ class Grid:
             # if the candidate was found, continue the search
 
     # define a function that checks for lone candidates in all test cells in the shared attribute list
-    # TODO: have to hav the function skip the cell itself when iterating over test cell indexes
+    # TODO: make sure the function skips the cell itself when iterating over test cell indexes
     def lone_candidate_single_attr(self, cell_of_interest: int, attr: int):
         # iterates over all test cells in the shared row/column/block (chosen based on attr)
         for test_cell in range(len(self._shared_row_column_block[attr])):
