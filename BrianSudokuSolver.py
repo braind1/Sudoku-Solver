@@ -65,6 +65,8 @@ class Grid:
         self._shared_row_column_block: List[list] = [self._current_row, self._current_column, self._current_block]
         # create the solution as an attribute to check against later
         self.full_solution: List[str] = list(game_solution)
+        # create a temporary list of potential lone candidates
+        self._potential_lone_candidates: List[int] = []
 
     def cell_generate(self, game: str):
         # iterate for all 81 cells
@@ -96,7 +98,8 @@ class Grid:
     # create a function that can reference the single attribute (attr) of a list given any instance of the class (cell instance)
     def attribute_test(self, cell_instance: int, attr: int) -> int:
         # create a list of the cell attributes to test corresponding to the row, column, and block
-        _attribute_test_list = [self.cells[cell_instance].position[1], self.cells[cell_instance].position[0], self.cells[cell_instance].block]
+        _attribute_test_list = [self.cells[cell_instance].position[1], self.cells[cell_instance].position[0],
+                                self.cells[cell_instance].block]
         # returns the single attribute element that was passed
         return _attribute_test_list[attr]
 
@@ -197,38 +200,69 @@ class Grid:
 
     # define a function that takes an instance of a cell, a single candidate index, and a test cell and checks if the candidate is in the test cell
     def lone_candidate(self, cell_of_interest: int, attr: int, candidate_index: int, test_cell: int) -> bool:
-        # checks if the candidate of the cell of interest is in the test cell's candidate list
-        if self._shared_row_column_block[attr][cell_of_interest].candidates[candidate_index] in self.cells[test_cell].candidates:
+        # checks if the test cell has no candidates and if it does, checks if the candidate of the cell of interest is in the test cell's candidate list
+        if len(self.cells[test_cell].candidates) == 0 \
+                or self._shared_row_column_block[attr][cell_of_interest].candidates[candidate_index] in self.cells[test_cell].candidates:
             # if the candidate is in the test cell's candidate, return true
             return True
         else:
+            # if the candidate is not found, could be a lone candidate
             return False
 
     # define a function that repeats the lone candidate search for all candidates in the test cell given
     def lone_candidate_full_cell(self, cell_of_interest: int, attr: int, test_cell: int):
         # iterates the lone candidate search for all the candidates of the test cell
-        for candidate in range(len(self.cells[cell_of_interest].candidates)):
+        for candidate_index in range(len(self.cells[cell_of_interest].candidates)):
             # assigns a boolean variable that is true if the candidate is not a lone candidate
-            is_lone_candidate: bool = self.lone_candidate(cell_of_interest, attr, candidate, test_cell)
+            is_not_lone_candidate: bool = self.lone_candidate(cell_of_interest, attr, candidate_index, test_cell)
             # checks if the lone candidate was found
-            if not is_lone_candidate:
-                # if the candidate was not found, the candidate is a lone candidate and should
-                self.cells[cell_of_interest].candidates = [self.cells[cell_of_interest].candidates[candidate]]
+            if not is_not_lone_candidate:
+                # if the candidate was not found, it is a potential lone candidate for the cell of interest
+                self._potential_lone_candidates.append(self.cells[cell_of_interest].candidates[candidate_index])
             # if the candidate was found, continue the search
 
     # define a function that checks for lone candidates in all test cells in the shared attribute list
-    # TODO: make sure the function skips the cell itself when iterating over test cell indexes
     def lone_candidate_single_attr(self, cell_of_interest: int, attr: int):
         # iterates over all test cells in the shared row/column/block (chosen based on attr)
-        for test_cell in range(len(self._shared_row_column_block[attr])):
+        for test_cell_index in range(len(self._shared_row_column_block[attr])):
             # checks if the test cell is the cell of interest
-            if self._shared_row_column_block[attr][test_cell] == self._shared_row_column_block[attr][cell_of_interest]:
+            if self._shared_row_column_block[attr][test_cell_index] == self._shared_row_column_block[attr][cell_of_interest]:
                 # does nothing, but continues for the next iteration of the for loop
                 continue
             # if the test cell isn't the cell of interest, pass it to the lone candidate check for a full cell
             else:
                 # call the lone candidate check for a full cell
-                self.lone_candidate_full_cell(cell_of_interest, attr, test_cell)
+                self.lone_candidate_full_cell(cell_of_interest, attr, test_cell_index)
+
+    # define a function that checks the lone candidates for all shared attributes
+    def lone_candidate_all_attrs(self, cell_of_interest: int):
+        # iterate the function for all shared attributes
+        for attr in range(len(self._shared_row_column_block)):
+            # call the lone candidate search for a single attribute
+            self.lone_candidate_single_attr(cell_of_interest, attr)
+
+    # define a function that checks if the potential lone candidates list only has 1 candidate
+    def potential_candidate_len_check(self, cell_of_interest: int):
+        # if there is only one potential lone candidate, that is a lone candidate and can be promoted to a solution
+        if len(self._potential_lone_candidates) == 1:
+            # set the solution of the cell of interest to its lone candidate
+            self.cells[cell_of_interest].solution = self._potential_lone_candidates[0]
+        # clear the potential candidates list after it has been promoted (len == 1) or hasn't (len > 1)
+        self._potential_lone_candidates.clear()
+
+    # define a function that calls the lone candidate search for all cells that have candidates
+    def grid_lone_candidate_search(self):
+        # iterate over all 81 cells
+        for cell_index in range(len(self.cells)):
+            # check if the cell has no candidates
+            if len(self.cells[cell_index].candidates) == 0:
+                # pass over the cell
+                continue
+            # if the cell has candidates, call the lone candidate search function
+            else:
+                self.lone_candidate_all_attrs(cell_index)
+            # both ways, call the lone candidate length check to clear out the potential lone candidate list
+            self.potential_candidate_len_check(cell_index)
 
     # create a test solve function that only repeats the simple algorithm a few times
     def test_solve(self):
@@ -250,9 +284,9 @@ game2 = "00907003551004020670000600160000709302301000000100050080000004919000005
 game2_solution = "I don't have a solution yet"
 
 # instantiate the only instance of the grid
-# simple_grid = Grid(game1, game1_solution)
+simple_grid = Grid(game1, game1_solution)
 # solves the full simple grid
-# simple_grid.simple_solve()
+simple_grid.simple_solve()
 
 # all tests used to check simple solve algorithm
 # print(grid.cells[5].position, grid.cells[5].block, grid.cells[5].given)
@@ -284,13 +318,13 @@ game2_solution = "I don't have a solution yet"
 # print(med_grid.cells[68].candidates)
 
 # test medium grid
-test_game = "070410000020060085500008000000000703830050006005090208900670530600000000050831600"
-test_game_solution = "Not sure what the solution is"
-test_grid = Grid(test_game, test_game_solution)
-test_grid.test_solve()
-print(test_grid.cells[74].candidates)
-print(test_grid.cells[79].candidates)
-print(test_grid.cells[80].candidates)
+# test_game = "070410000020060085500008000000000703830050006005090208900670530600000000050831600"
+# test_game_solution = "Not sure what the solution is"
+# test_grid = Grid(test_game, test_game_solution)
+# test_grid.test_solve()
+# print(test_grid.cells[74].candidates)
+# print(test_grid.cells[79].candidates)
+# print(test_grid.cells[80].candidates)
 # print(test_grid.cells[70].candidates)
 # print(test_grid.cells[71].candidates)
 # print(test_grid.cells[26].candidates)
