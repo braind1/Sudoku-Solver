@@ -176,12 +176,20 @@ class Grid:
 
     # define a function to solve the sudoku
     def simple_solve(self):
+        # create a temporary variable to represent the previous number of unsolved cells
+        _current_unsolved: List[int] = [81, self.number_unsolved()]
+        # initialize the unsolved index to 1
+        _current_unsolved_index = 1
         # while cells are still unsolved
-        while self.number_unsolved() > 0:
+        while _current_unsolved[_current_unsolved_index] != _current_unsolved[_current_unsolved_index - 1]:
             # generate the candidates list for all the cells
             self.full_grid_candidates()
             # promote all the single candidates to solutions
             self.solution_promote()
+            # append the current unsolved list to know whether to continue the loop
+            _current_unsolved.append(self.number_unsolved())
+            # iterate the index being checked for
+            _current_unsolved_index += 1
             # print the resultant board
             self.solution_print()
         # at the end, check whether the solved solution matches the given solution, and print the output
