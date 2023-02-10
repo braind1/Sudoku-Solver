@@ -272,6 +272,29 @@ class Grid:
             # both ways, call the lone candidate length check to clear out the potential lone candidate list
             self.potential_candidate_len_check(cell_index)
 
+    # define the level 2 solver that incorporates the lone candidate algorithm into the simple solver
+    def lev2_solve(self):
+        # create a temporary variable to represent the previous number of unsolved cells
+        _current_unsolved_lev2: List[int] = [81, self.number_unsolved()]
+        # initialize the unsolved index to 1
+        _current_unsolved_index = 1
+        # while cells are still unsolved
+        while _current_unsolved_lev2[_current_unsolved_index] != _current_unsolved_lev2[_current_unsolved_index - 1]:
+            # generate the candidates list for all the cells
+            self.full_grid_candidates()
+            # promote all the single candidates to solutions
+            self.solution_promote()
+            # complete the lone candidate search
+            self.grid_lone_candidate_search()
+            # append the current unsolved list to know whether to continue the loop
+            _current_unsolved_lev2.append(self.number_unsolved())
+            # iterate the index being checked for
+            _current_unsolved_index += 1
+            # print the resultant board
+            self.solution_print()
+        # at the end, check whether the solved solution matches the given solution, and print the output
+        print(self.solve_check())
+
     # create a test solve function that only repeats the simple algorithm a few times
     def test_solve(self):
         # repeat the simple solve algorithm 10 times
@@ -292,9 +315,9 @@ game2 = "00907003551004020670000600160000709302301000000100050080000004919000005
 game2_solution = "I don't have a solution yet"
 
 # instantiate the only instance of the grid
-simple_grid = Grid(game1, game1_solution)
+# simple_grid = Grid(game1, game1_solution)
 # solves the full simple grid
-simple_grid.simple_solve()
+# simple_grid.simple_solve()
 
 # all tests used to check simple solve algorithm
 # print(grid.cells[5].position, grid.cells[5].block, grid.cells[5].given)
@@ -315,7 +338,9 @@ simple_grid.simple_solve()
 # grid.solve_check()
 
 # instantiate the more difficult sudoku
-# med_grid = Grid(game2, game2_solution)
+med_grid = Grid(game2, game2_solution)
+# apply the level 2 algorithm to the game
+med_grid.lev2_solve()
 # get the full candidates list for cell 68
 # med_grid.full_candidate_modify(68)
 # get the full candidates list for cell 69
