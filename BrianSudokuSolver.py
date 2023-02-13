@@ -208,6 +208,10 @@ class Grid:
 
     # define a function that takes an instance of a cell, a single candidate index, and a test cell and checks if the candidate is in the test cell
     def lone_candidate(self, cell_of_interest: int, attr: int, candidate_index: int, test_cell: int) -> bool:
+        # create a test to help debug
+        # TODO: fix this bug!
+        if not candidate_index < len(self._shared_row_column_block[attr][cell_of_interest].candidates):
+            pass
         # checks if the test cell has no candidates and if it does, checks if the candidate of the cell of interest is in the test cell's candidate list
         if len(self.cells[test_cell].candidates) == 0 \
                 or self._shared_row_column_block[attr][cell_of_interest].candidates[candidate_index] in self.cells[test_cell].candidates:
@@ -294,6 +298,58 @@ class Grid:
             self.solution_print()
         # at the end, check whether the solved solution matches the given solution, and print the output
         print(self.solve_check())
+
+    # define a function that checks if the candidates list of cell has length 2
+    def candidate_len_check(self, cell_of_interest: int) -> bool:
+        # if the length of the candidates list is 2
+        if len(self.cells[cell_of_interest].candidates) == 2:
+            # return True
+            return True
+        # if the length isn't 2
+        # TODO: is else false assumed?
+        else:
+            # return False
+            return False
+
+    # define a function that performs the length check for all cells in a single shared attribute list and removes all false cases
+    def single_attr_cand_len_remove(self, attr: int):
+        # iterate over all cells in the single shared attribute list
+        for cell_index in range(len(self._shared_row_column_block[attr])):
+            # if the length check returned true, length is 2 and the cell can be kept
+            if self.candidate_len_check(cell_index):
+                # do nothing and continue the loop
+                continue
+            # if the length check is false, length isn't 2 and the cell should be removed
+            else:
+                # remove the cell_index cell from the single shared attribute list
+                self._shared_row_column_block[attr].remove(self._shared_row_column_block[attr][cell_index])
+
+    # define a function that checks if a candidate of 2 cells are the same
+    def single_shared_candidate(self, cell_of_interest: int, test_cell: int, candidate_index: int) -> bool:
+        # check the candidate at candidate index of both cells is the same
+        if self.cells[cell_of_interest].candidates[candidate_index] == self.cells[test_cell].candidates[cell_of_interest]:
+            return True
+
+    # define a function that repeats the single shared candidate search for both candidates in the cell of interest
+    def cell_shared_candidates(self, cell_of_interest: int, test_cell: int):
+        # initialize the number of matches to 0
+        _num_matches = 0
+        # iterate for both candidates
+        for candidate_index in range(len(self.cells[cell_of_interest].candidates)):
+            # add the boolean value (0 for false, 1 for true) based on the result of the single candidate check
+            _num_matches += self.single_shared_candidate(cell_of_interest, test_cell, candidate_index)
+        # if both of the candidates match, the naked pair has been found
+        if _num_matches == 2:
+            # TODO: not sure what the output should be here to indicate that the naked pair has been found and to remove those candidates from the rest of the cells
+            return True
+        else:
+            return False
+
+    # define a function that calls the length removal function, then checks the remaining cells with the single candidate check
+    def single_attr_naked_pair_find(self, attr: int):
+        # call the removal function to leave only cells with length 2
+        self.single_attr_cand_len_remove(attr)
+        # then repeat the shared candidate search
 
     # create a test solve function that only repeats the simple algorithm a few times
     def test_solve(self):
