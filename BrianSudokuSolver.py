@@ -345,11 +345,39 @@ class Grid:
         else:
             return False
 
+    # define a function that removes the candidates of one cell from another
+    def single_cell_candidate_remove(self, cell_of_interest: int, test_cell: int):
+        # iterate over all the candidates in the cell of interest
+        for candidate_index in range(len(self.cells[cell_of_interest].candidates)):
+            # remove the candidate in the cell of interest from the test cell
+            self.cells[test_cell].candidates.remove(self.cells[cell_of_interest].candidates[candidate_index])
+
+    # define a function that repeats the single cell candidate removal function for all cells in the shared attribute list except for the naked pair cell
+    def full_shared_attr_cand_remove(self, cell_of_interest: int, attr: int):
+        # iterate for all cells in the shared attribute list
+        for cell_index in range(len(self._shared_row_column_block[attr])):
+            # if the test cell has the same candidates as the cell of interest, do nothing
+            if self._shared_row_column_block[attr][cell_index].candidates == self._shared_row_column_block[attr][cell_of_interest].candidates:
+                continue
+            # if the test cell isn't the naked pair, remove the naked pair candidates from the test cell
+            else:
+                # call the removal function on the test cell
+                self.single_cell_candidate_remove(cell_of_interest, self._shared_row_column_block[attr][cell_index])
+
     # define a function that calls the length removal function, then checks the remaining cells with the single candidate check
-    def single_attr_naked_pair_find(self, attr: int):
+    def single_attr_naked_pair_find(self, cell_of_interest: int, attr: int):
         # call the removal function to leave only cells with length 2
         self.single_attr_cand_len_remove(attr)
-        # then repeat the shared candidate search
+        # then repeat the shared candidate search for all test cells in the shared attribute list
+        for cell_index in range(len(self._shared_row_column_block[attr])):
+            # check if the cell of interest was a naked pair with the test cell
+            if self.cell_shared_candidates(cell_of_interest, self._shared_row_column_block[attr][cell_index]):
+                # then remove the candidates in cell of interest from the other cells in the shared attribute (except the cell with the same candidates)
+                # TODO: write an iterable removal function
+                self.full_shared_attr_cand_remove(cell_of_interest, attr)
+            # if the two cells aren't a naked pair, do nothing
+            else:
+                continue
 
     # create a test solve function that only repeats the simple algorithm a few times
     def test_solve(self):
