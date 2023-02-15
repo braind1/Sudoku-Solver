@@ -266,6 +266,8 @@ class Grid:
         if len(self._potential_lone_candidates) == 1:
             # set the solution of the cell of interest to its lone candidate
             self.cells[cell_of_interest].solution = self._potential_lone_candidates[0]
+            # clear the candidates list of the cell after a solution has been promoted
+            self.cells[cell_of_interest].candidates.clear()
         # clear the potential candidates list after it has been promoted (len == 1) or hasn't (len > 1)
         self._potential_lone_candidates.clear()
 
