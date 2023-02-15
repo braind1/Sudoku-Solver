@@ -20,6 +20,14 @@ class Cell:
         self.block: int = 0
         # call the block assignment function to reassign the block number
         self.block_assign()
+        # create a list of cells in the same row
+        self.shared_row: List[Cell] = []
+        # create a list of cells in the same column
+        self.shared_column: List[Cell] = []
+        # create a list of cells in the same block
+        self.shared_block: List[Cell] = []
+        # create a list of those shared lists
+        self.shared_row_column_block: List[list] = [self.shared_row, self.shared_column, self.shared_block]
 
     # add the string method to print a basic string with all the information about the instance of a cell
     def __str__(self):
@@ -87,55 +95,56 @@ class Grid:
                 # set the solution for the cell to the given
                 self.cells[e].solution = self.cells[e].given
 
+    @staticmethod
     # create a function that removes givens and solutions of test cell from the candidates list of cell of interest
     # takes the cell numbers (starting at 0) as arguments cell of interest and test cell
-    def candidate_check(self, cell_of_interest: int, test_cell: Cell):
+    def candidate_check(cell_of_interest: Cell, test_cell: Cell):
         # executes if the given is currently in the candidates list, ie given != 0
-        if test_cell.given in self.cells[cell_of_interest].candidates:
+        if test_cell.given in cell_of_interest.candidates:
             # removes the given of b from the candidates list of a
-            self.cells[cell_of_interest].candidates.remove(test_cell.given)
+            cell_of_interest.candidates.remove(test_cell.given)
 
         # executes if cell b has a solution, and it is in the candidates list
-        if test_cell.solution in self.cells[cell_of_interest].candidates:
+        if test_cell.solution in cell_of_interest.candidates:
             # removes the solution of b from the candidates list of a
-            self.cells[cell_of_interest].candidates.remove(test_cell.solution)
+            cell_of_interest.candidates.remove(test_cell.solution)
 
+    @staticmethod
     # create a function that can reference the single attribute (attr) of a list given any instance of the class (cell instance)
-    def attribute_test(self, cell_instance: int, attr: int) -> int:
+    def attribute_test(cell_instance: Cell, attr: int) -> int:
         # create a list of the cell attributes to test corresponding to the row, column, and block
-        _attribute_test_list = [self.cells[cell_instance].position[1], self.cells[cell_instance].position[0],
-                                self.cells[cell_instance].block]
+        _attribute_test_list = [cell_instance.position[1], cell_instance.position[0], cell_instance.block]
         # returns the single attribute element that was passed
         return _attribute_test_list[attr]
 
     # Create a function that checks all 81 cells for 1 shared attribute, then appends the associated list.
     # Will be passed the index of the cell of interest and the index of the attribute it is checking for (attr)
-    def single_shared_attribute_find(self, cell_of_interest: int, attr: int):
+    def single_shared_attribute_find(self, cell_of_interest: Cell, attr: int):
         # clear the temporary list associated with the attr
         self._shared_row_column_block[attr].clear()
         # checks all 81 instances of cell
         for f in range(len(self.cells)):
             # if the attribute (b) of the cell of interest (a) matches the attribute (b) of the test cell (f)
-            if self.attribute_test(cell_of_interest, attr) == self.attribute_test(f, attr):
+            if self.attribute_test(cell_of_interest, attr) == self.attribute_test(self.cells[f], attr):
                 # append the corresponding attribute list (b) with test cell (f)
                 self._shared_row_column_block[attr].append(self.cells[f])
 
     # define a function that finds all 3 shared attributes (row, column, and block)
-    def full_attribute_find(self, cell_of_interest: int):
+    def full_attribute_find(self, cell_of_interest: Cell):
         # repeat for all 3 shared attributes
         for attr in range(len(self._shared_row_column_block)):
             # call the function to append the appropriate list (attr) when given the cell of interest
             self.single_shared_attribute_find(cell_of_interest, attr)
 
     # define a function that calls candidate check and is passed the list of cells with a shared attribute
-    def row_candidate_modify(self, cell_of_interest: int, attr: int):
+    def row_candidate_modify(self, cell_of_interest: Cell, attr: int):
         # repeat candidate check for all cells in the shared list
         for n in range(len(self._shared_row_column_block[attr])):
             # calls the candidate check function with the nth element of the appropriate list (attr)
             self.candidate_check(cell_of_interest, self._shared_row_column_block[attr][n])
 
     # create a function that modifies the candidates list of a cell based on all 3 attributes
-    def full_candidate_modify(self, cell_of_interest: int):
+    def full_candidate_modify(self, cell_of_interest: Cell):
         # call the function to find all the cells that have shared attributes
         self.full_attribute_find(cell_of_interest)
         # repeat the row modify for all 3 attributes
@@ -146,9 +155,10 @@ class Grid:
     # create a function that calls the full candidate modify function for all cells in the grid
     def full_grid_candidates(self):
         # repeat for all 81 cells in the grid
+        # map(self.full_candidate_modify, self.cells)
         for cell_index in range(len(self.cells)):
             # call the full candidate modify on the ath cell of the grid
-            self.full_candidate_modify(cell_index)
+            self.full_candidate_modify(self.cells[cell_index])
 
     # define a function that promotes a candidate to a solution
     def solution_promote(self):
@@ -254,7 +264,7 @@ class Grid:
     # define a function that checks the lone candidates for all shared attributes
     def lone_candidate_all_attrs(self, cell_of_interest: int):
         # regenerate the full list of cells with shared attributes
-        self.full_attribute_find(cell_of_interest)
+        self.full_attribute_find(self.cells[cell_of_interest])
         # iterate the function for all shared attributes
         for attr in range(len(self._shared_row_column_block)):
             # call the lone candidate search for a single attribute
@@ -283,7 +293,7 @@ class Grid:
             # the lone candidate only needs to exist in one attribute for it to be lone
             else:
                 # regenerate the full list of cells with shared attributes
-                self.full_attribute_find(cell_index)
+                self.full_attribute_find(self.cells[cell_index])
                 self.lone_candidate_single_attr(cell_index, attr)
             # both ways, call the lone candidate length check to clear out the potential lone candidate list
             self.potential_candidate_len_check(cell_index)
