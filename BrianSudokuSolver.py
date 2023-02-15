@@ -21,6 +21,11 @@ class Cell:
         # call the block assignment function to reassign the block number
         self.block_assign()
 
+    # add the string method to print a basic string with all the information about the instance of a cell
+    def __str__(self):
+        # add all the attributes of the cell to the string
+        return f'p:{self.position}g:{self.given}c:{self.candidates}s:{self.solution}b:{self.block}'
+
     @staticmethod
     # create a function that takes one of the positions and simplifies it
     def coord_simplify(a: int) -> int:
@@ -206,15 +211,15 @@ class Grid:
         else:
             return False
 
+    # TODO: this function is not being passed the correct test cells (needs to take test cells from the shared row column block list)
     # define a function that takes an instance of a cell, a single candidate index, and a test cell and checks if the candidate is in the test cell
-    def lone_candidate(self, cell_of_interest: int, attr: int, candidate_index: int, test_cell: int) -> bool:
+    def lone_candidate(self, cell_of_interest: int, candidate_index: int, test_cell: Cell) -> bool:
         # create a test to help debug
-        # TODO: fix this bug!
-        if not candidate_index < len(self._shared_row_column_block[attr][cell_of_interest].candidates):
+        if not candidate_index < len(self.cells[cell_of_interest].candidates):
             pass
         # checks if the test cell has no candidates and if it does, checks if the candidate of the cell of interest is in the test cell's candidate list
-        if len(self.cells[test_cell].candidates) == 0 \
-                or self._shared_row_column_block[attr][cell_of_interest].candidates[candidate_index] in self.cells[test_cell].candidates:
+        if len(test_cell.candidates) == 0 or len(self.cells[cell_of_interest].candidates) == 0 \
+                or self.cells[cell_of_interest].candidates[candidate_index] in test_cell.candidates:
             # if the candidate is in the test cell's candidate, return true
             return True
         else:
@@ -222,11 +227,11 @@ class Grid:
             return False
 
     # define a function that repeats the lone candidate search for all candidates in the test cell given
-    def lone_candidate_full_cell(self, cell_of_interest: int, attr: int, test_cell: int):
+    def lone_candidate_full_cell(self, cell_of_interest: int, test_cell: Cell):
         # iterates the lone candidate search for all the candidates of the test cell
         for candidate_index in range(len(self.cells[cell_of_interest].candidates)):
             # assigns a boolean variable that is true if the candidate is not a lone candidate
-            is_not_lone_candidate: bool = self.lone_candidate(cell_of_interest, attr, candidate_index, test_cell)
+            is_not_lone_candidate: bool = self.lone_candidate(cell_of_interest, candidate_index, test_cell)
             # checks if the lone candidate was found
             if not is_not_lone_candidate:
                 # if the candidate was not found, it is a potential lone candidate for the cell of interest
@@ -238,16 +243,18 @@ class Grid:
         # iterates over all test cells in the shared row/column/block (chosen based on attr)
         for test_cell_index in range(len(self._shared_row_column_block[attr])):
             # checks if the test cell is the cell of interest
-            if self._shared_row_column_block[attr][test_cell_index] == self._shared_row_column_block[attr][cell_of_interest]:
+            if self._shared_row_column_block[attr][test_cell_index] == self.cells[cell_of_interest]:
                 # does nothing, but continues for the next iteration of the for loop
                 continue
             # if the test cell isn't the cell of interest, pass it to the lone candidate check for a full cell
             else:
                 # call the lone candidate check for a full cell
-                self.lone_candidate_full_cell(cell_of_interest, attr, test_cell_index)
+                self.lone_candidate_full_cell(cell_of_interest, self._shared_row_column_block[attr][test_cell_index])
 
     # define a function that checks the lone candidates for all shared attributes
     def lone_candidate_all_attrs(self, cell_of_interest: int):
+        # regenerate the full list of cells with shared attributes
+        self.full_attribute_find(cell_of_interest)
         # iterate the function for all shared attributes
         for attr in range(len(self._shared_row_column_block)):
             # call the lone candidate search for a single attribute
@@ -263,16 +270,17 @@ class Grid:
         self._potential_lone_candidates.clear()
 
     # define a function that calls the lone candidate search for all cells that have candidates
-    def grid_lone_candidate_search(self):
+    def grid_lone_candidate_search(self, attr: int):
         # iterate over all 81 cells
         for cell_index in range(len(self.cells)):
             # check if the cell has no candidates
             if len(self.cells[cell_index].candidates) == 0:
                 # pass over the cell
                 continue
-            # if the cell has candidates, call the lone candidate search function
+            # if the cell has candidates, call the lone candidate search function.
+            # the lone candidate only needs to exist in one attribute for it to be lone
             else:
-                self.lone_candidate_all_attrs(cell_index)
+                self.lone_candidate_single_attr(cell_index, attr)
             # both ways, call the lone candidate length check to clear out the potential lone candidate list
             self.potential_candidate_len_check(cell_index)
 
@@ -289,7 +297,7 @@ class Grid:
             # promote all the single candidates to solutions
             self.solution_promote()
             # complete the lone candidate search
-            self.grid_lone_candidate_search()
+            self.grid_lone_candidate_search(1)
             # append the current unsolved list to know whether to continue the loop
             _current_unsolved_lev2.append(self.number_unsolved())
             # iterate the index being checked for
@@ -396,7 +404,7 @@ game1_solution = "86437125932584976197126584343619258719865743225748391668973412
 
 # game 2 is harder, cannot be solved using the basic technique
 game2 = "009070035510040206700006001600007093023010000001000500800000049190000058007000600"
-game2_solution = "I don't have a solution yet"
+game2_solution = "269871435518349276734256981685427193423915867971683524856132749192764358347598612"
 
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
@@ -445,3 +453,6 @@ med_grid.lev2_solve()
 # print(test_grid.cells[70].candidates)
 # print(test_grid.cells[71].candidates)
 # print(test_grid.cells[26].candidates)
+
+# TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
+# first cell that has a lone candidate is cell 68 with lone candidate 4
