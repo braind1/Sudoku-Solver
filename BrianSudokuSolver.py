@@ -280,6 +280,8 @@ class Grid:
             # if the cell has candidates, call the lone candidate search function.
             # the lone candidate only needs to exist in one attribute for it to be lone
             else:
+                # regenerate the full list of cells with shared attributes
+                self.full_attribute_find(cell_index)
                 self.lone_candidate_single_attr(cell_index, attr)
             # both ways, call the lone candidate length check to clear out the potential lone candidate list
             self.potential_candidate_len_check(cell_index)
