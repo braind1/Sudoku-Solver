@@ -155,7 +155,7 @@ class Grid:
     # create a function that calls the full candidate modify function for all cells in the grid
     def full_grid_candidates(self):
         # repeat for all 81 cells in the grid
-        # map(self.full_candidate_modify, self.cells)
+        # map(self.full_candidate_modify, self.cells) - TODO: attempted to use the map function to replace the loop, didn't work
         for cell_index in range(len(self.cells)):
             # call the full candidate modify on the ath cell of the grid
             self.full_candidate_modify(self.cells[cell_index])
@@ -221,15 +221,16 @@ class Grid:
         else:
             return False
 
+    @staticmethod
     # TODO: this function is not being passed the correct test cells (needs to take test cells from the shared row column block list)
     # define a function that takes an instance of a cell, a single candidate index, and a test cell and checks if the candidate is in the test cell
-    def lone_candidate(self, cell_of_interest: int, candidate_index: int, test_cell: Cell) -> bool:
+    def lone_candidate(cell_of_interest: Cell, candidate_index: int, test_cell: Cell) -> bool:
         # create a test to help debug
-        if not candidate_index < len(self.cells[cell_of_interest].candidates):
+        if not candidate_index < len(cell_of_interest.candidates):
             pass
         # checks if the test cell has no candidates and if it does, checks if the candidate of the cell of interest is in the test cell's candidate list
-        if len(test_cell.candidates) == 0 or len(self.cells[cell_of_interest].candidates) == 0 \
-                or self.cells[cell_of_interest].candidates[candidate_index] in test_cell.candidates:
+        if len(test_cell.candidates) == 0 or len(cell_of_interest.candidates) == 0 \
+                or cell_of_interest.candidates[candidate_index] in test_cell.candidates:
             # if the candidate is in the test cell's candidate, return true
             return True
         else:
@@ -237,23 +238,23 @@ class Grid:
             return False
 
     # define a function that repeats the lone candidate search for all candidates in the test cell given
-    def lone_candidate_full_cell(self, cell_of_interest: int, test_cell: Cell):
+    def lone_candidate_full_cell(self, cell_of_interest: Cell, test_cell: Cell):
         # iterates the lone candidate search for all the candidates of the test cell
-        for candidate_index in range(len(self.cells[cell_of_interest].candidates)):
+        for candidate_index in range(len(cell_of_interest.candidates)):
             # assigns a boolean variable that is true if the candidate is not a lone candidate
             is_not_lone_candidate: bool = self.lone_candidate(cell_of_interest, candidate_index, test_cell)
             # checks if the lone candidate was found
             if not is_not_lone_candidate:
                 # if the candidate was not found, it is a potential lone candidate for the cell of interest
-                self._potential_lone_candidates.append(self.cells[cell_of_interest].candidates[candidate_index])
+                self._potential_lone_candidates.append(cell_of_interest.candidates[candidate_index])
             # if the candidate was found, continue the search
 
     # define a function that checks for lone candidates in all test cells in the shared attribute list
-    def lone_candidate_single_attr(self, cell_of_interest: int, attr: int):
+    def lone_candidate_single_attr(self, cell_of_interest: Cell, attr: int):
         # iterates over all test cells in the shared row/column/block (chosen based on attr)
         for test_cell_index in range(len(self._shared_row_column_block[attr])):
             # checks if the test cell is the cell of interest
-            if self._shared_row_column_block[attr][test_cell_index] == self.cells[cell_of_interest]:
+            if self._shared_row_column_block[attr][test_cell_index] == cell_of_interest:
                 # does nothing, but continues for the next iteration of the for loop
                 continue
             # if the test cell isn't the cell of interest, pass it to the lone candidate check for a full cell
@@ -262,9 +263,9 @@ class Grid:
                 self.lone_candidate_full_cell(cell_of_interest, self._shared_row_column_block[attr][test_cell_index])
 
     # define a function that checks the lone candidates for all shared attributes
-    def lone_candidate_all_attrs(self, cell_of_interest: int):
+    def lone_candidate_all_attrs(self, cell_of_interest: Cell):
         # regenerate the full list of cells with shared attributes
-        self.full_attribute_find(self.cells[cell_of_interest])
+        self.full_attribute_find(cell_of_interest)
         # iterate the function for all shared attributes
         for attr in range(len(self._shared_row_column_block)):
             # call the lone candidate search for a single attribute
@@ -294,7 +295,7 @@ class Grid:
             else:
                 # regenerate the full list of cells with shared attributes
                 self.full_attribute_find(self.cells[cell_index])
-                self.lone_candidate_single_attr(cell_index, attr)
+                self.lone_candidate_single_attr(self.cells[cell_index], attr)
             # both ways, call the lone candidate length check to clear out the potential lone candidate list
             self.potential_candidate_len_check(cell_index)
 
