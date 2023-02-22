@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import Callable, List
 
 
 class Cell:
@@ -27,7 +27,7 @@ class Cell:
         # create a list of cells in the same block
         self.shared_block: List[Cell] = []
         # create a list of those shared lists
-        self.shared_row_column_block: List[list] = [self.shared_row, self.shared_column, self.shared_block]
+        self.shared_house: List[list] = [self.shared_row, self.shared_column, self.shared_block]
 
     # add the string method to print a basic string with all the information about the instance of a cell
     def __str__(self):
@@ -67,6 +67,7 @@ class Cell:
         self.solution = solution
         # clear the candidates list
         self.candidates.clear()
+
 
 class Grid:
     def __init__(self, game, game_solution):
@@ -129,11 +130,11 @@ class Grid:
         # clear the temporary list associated with the attr
         self._shared_row_column_block[attr].clear()
         # checks all 81 instances of cell
-        for f in range(len(self.cells)):
+        for test_cell in range(len(self.cells)):
             # if the attribute (b) of the cell of interest (a) matches the attribute (b) of the test cell (f)
-            if self.attribute_test(cell_of_interest, attr) == self.attribute_test(self.cells[f], attr):
+            if self.attribute_test(cell_of_interest, attr) == self.attribute_test(self.cells[test_cell], attr):
                 # append the corresponding attribute list (b) with test cell (f)
-                self._shared_row_column_block[attr].append(self.cells[f])
+                self._shared_row_column_block[attr].append(self.cells[test_cell])
 
     # define a function that finds all 3 shared attributes (row, column, and block)
     def full_attribute_find(self, cell_of_interest: Cell):
