@@ -81,7 +81,9 @@ class Grid:
         self._potential_lone_candidates: List[int] = []
         # populate the lists of shared houses for each cell
         # self.cell_candidates_generate()
-        self.solve_techniques: List[Callable] = [self.single_cand_solve, self.full_grid_lone_candidates]
+        # create a list of the solving techniques the grid has
+        self.solve_techniques: List[Callable] = [self.single_cand_solve, self.full_grid_lone_candidates,
+                                                 self.naked_pair_full_grid]
 
     def cell_generate(self, game: str):
         # iterate for all 81 cells
@@ -333,6 +335,15 @@ class Grid:
         for attr in range(len(cell_of_interest.shared_house)):
             # call the naked pair find for the specific house
             self.naked_pair_in_shared_house(cell_of_interest, attr)
+
+    # define a function that does the full naked pair search for all cells in the grid
+    def naked_pair_full_grid(self):
+        # iterate for all cells in the grid
+        for cell in self.cells:
+            # call the naked pair function for its full house
+            self.naked_pair_full_house(cell)
+        # TODO: also should work with a map
+        # map(self.naked_pair_full_house, self.cells)
 
     # define a function that checks if the candidates list of cell has length 2
     def candidate_len_check(self, cell_of_interest: int) -> bool:
