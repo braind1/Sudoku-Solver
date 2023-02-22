@@ -90,17 +90,22 @@ class Grid:
 
     def cell_generate(self, game: str):
         # iterate for all 81 cells
-        for e in range(81):
+        for cells in range(len(game)):
             # append the list with an instance of the Cell class
-            self.cells.append(Cell(e))
+            self.cells.append(Cell(cells))
             # set the given attribute to the corresponding digit in the given problem
-            self.cells[e].given = int(game[e])
+            self.cells[cells].given = int(game[cells])
             # if the given isn't 0, the cell should have no candidates
-            if self.cells[e].given != 0:
+            if self.cells[cells].given != 0:
                 # set the candidates list to an empty list
-                self.cells[e].candidates.clear()
+                self.cells[cells].candidates.clear()
                 # set the solution for the cell to the given
-                self.cells[e].solution = self.cells[e].given
+                self.cells[cells].solution = self.cells[cells].given
+
+    # define a function that populates the shared house lists immediately after cell generation
+    def cell_candidates_generate(self):
+        # iterate the shared house generate for every cell in the list of cells
+        map(self.full_attribute_find, self.cells)
 
     @staticmethod
     # create a function that removes givens and solutions of test cell from the candidates list of cell of interest
@@ -127,35 +132,33 @@ class Grid:
     # Create a function that checks all 81 cells for 1 shared attribute, then appends the associated list.
     # Will be passed the index of the cell of interest and the index of the attribute it is checking for (attr)
     def single_shared_attribute_find(self, cell_of_interest: Cell, attr: int):
-        # clear the temporary list associated with the attr
-        self._shared_row_column_block[attr].clear()
         # checks all 81 instances of cell
         for test_cell in range(len(self.cells)):
             # if the attribute (b) of the cell of interest (a) matches the attribute (b) of the test cell (f)
             if self.attribute_test(cell_of_interest, attr) == self.attribute_test(self.cells[test_cell], attr):
                 # append the corresponding attribute list (b) with test cell (f)
-                self._shared_row_column_block[attr].append(self.cells[test_cell])
+                cell_of_interest.shared_house[attr].append(self.cells[test_cell])
 
     # define a function that finds all 3 shared attributes (row, column, and block)
     def full_attribute_find(self, cell_of_interest: Cell):
         # repeat for all 3 shared attributes
-        for attr in range(len(self._shared_row_column_block)):
+        for attr in range(len(cell_of_interest.shared_house)):
             # call the function to append the appropriate list (attr) when given the cell of interest
             self.single_shared_attribute_find(cell_of_interest, attr)
 
     # define a function that calls candidate check and is passed the list of cells with a shared attribute
     def row_candidate_modify(self, cell_of_interest: Cell, attr: int):
         # repeat candidate check for all cells in the shared list
-        for n in range(len(self._shared_row_column_block[attr])):
+        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
             # calls the candidate check function with the nth element of the appropriate list (attr)
-            self.candidate_check(cell_of_interest, self._shared_row_column_block[attr][n])
+            self.candidate_check(cell_of_interest, cell_of_interest.shared_house[attr][test_cell_index])
 
     # create a function that modifies the candidates list of a cell based on all 3 attributes
     def full_candidate_modify(self, cell_of_interest: Cell):
         # call the function to find all the cells that have shared attributes
         self.full_attribute_find(cell_of_interest)
         # repeat the row modify for all 3 attributes
-        for attr in range(len(self._shared_row_column_block)):
+        for attr in range(len(cell_of_interest.shared_house)):
             # calls the row modify function for cell of interest and all the attributes
             self.row_candidate_modify(cell_of_interest, attr)
 
@@ -229,16 +232,18 @@ class Grid:
             print(f"s:{''.join(self.full_solution)}")
             return False
 
+    @staticmethod
     # iterate for all cells in the shared attribute(house), add all candidates in the house to a temporary list (except the cell of interest's candidates)
-    def temp_lone_candidate_list(self, cell_of_interest: Cell, attr: int) -> List[int]:
+    def temp_lone_candidate_list(cell_of_interest: Cell, attr: int) -> List[int]:
         # create a temporary list of all candidates in the shared house (without adding the candidates from the cell of interest)
         _temp_lone_candidate_list: List[int] = []
         # iterate for all test cells in the shared house
-        for test_cell_index in range(len(self._shared_row_column_block[attr])):
+        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
             # check if the test cell is the cell of interest
-            if self._shared_row_column_block[attr][test_cell_index] is not cell_of_interest:
+            if cell_of_interest.shared_house[attr][test_cell_index] is not cell_of_interest:
                 # add the candidates to the temporary list as long as the test cell isn't the cell of interest
-                _temp_lone_candidate_list.extend(self._shared_row_column_block[attr][test_cell_index].candidates)
+                _temp_lone_candidate_list.extend(cell_of_interest.shared_house[attr][test_cell_index].candidates)
+        # return the temporary list of candidates to search through
         return _temp_lone_candidate_list
 
     # define a function that iterates over all the candidates in the cell of interest, and checks them against the temporary candidates list
@@ -252,13 +257,16 @@ class Grid:
                 # if the candidate is not found elsewhere in the house, the candidate is the solution to the cell of interest
                 cell_of_interest.set_solution(candidate)
 
+    # define a function that calls the potential lone candidate search for all attributes in the house
     def full_cell_lone_candidate_search(self, cell_of_interest: Cell):
-        for attr in range(len(self._shared_row_column_block)):
+        # iterate over every attribute in the house
+        for attr in range(len(cell_of_interest.shared_house)):
+            # search for the lone candidates
             self.potential_lone_candidate_search(cell_of_interest, attr)
 
+    # define a function that finds the lone candidates of every cell
     def full_grid_lone_candidates(self):
         for cell in self.cells:
-            self.full_attribute_find(cell)
             self.full_cell_lone_candidate_search(cell)
 
     # define the level 2 solver that incorporates the lone candidate algorithm into the simple solver
@@ -363,17 +371,6 @@ class Grid:
             else:
                 continue
 
-    # create a test solve function that only repeats the simple algorithm a few times
-    def test_solve(self):
-        # repeat the simple solve algorithm 10 times
-        for a in range(10):
-            # generate the candidates list for all the cells
-            self.full_grid_candidates()
-            # promote all the single candidates to solutions
-            self.solution_promote()
-            # print the resultant board
-            self.solution_print()
-
 
 game1 = "004300209005009001070060043006002087190007400050083000600000105003508690042910300"
 game1_solution = "864371259325849761971265843436192587198657432257483916689734125713528694542916378"
@@ -387,48 +384,11 @@ game2_solution = "26987143551834927673425698168542719342391586797168352485613274
 # solves the full simple grid
 # simple_grid.simple_solve()
 
-# all tests used to check simple solve algorithm
-# print(grid.cells[5].position, grid.cells[5].block, grid.cells[5].given)
-# grid.candidate_check(0, grid.cells[2])
-# print(grid.cells[0].candidates)
-# print(grid.attribute_test(2, 0))
-# grid.single_shared_attribute_find(0, 0)
-# grid.row_candidate_modify(0, 0)
-# grid.full_candidate_modify(1)
-# grid.full_grid_candidates()
-# grid.solution_promote()
-# grid.solution_print()
-# print(grid.cells[0].solution)
-# print(grid.cells[1].candidates)
-# print(type(grid.cells[0].solution))
-# print(grid.full_solution)
-# print(type(grid.full_solution[0]))
-# grid.solve_check()
-
 # instantiate the more difficult sudoku
 med_grid = Grid(game2, game2_solution)
 # apply the level 2 algorithm to the game
 med_grid.lev2_solve()
-# get the full candidates list for cell 68
-# med_grid.full_candidate_modify(68)
-# get the full candidates list for cell 69
-# med_grid.full_candidate_modify(69)
-# attempt the lone candidate find with cell 68 in the medium grid
-# med_grid.lone_candidate_full(68, 69)
-# print the candidates for cell 68
-# print(med_grid.cells[68].candidates)
 
-# test medium grid
-# test_game = "070410000020060085500008000000000703830050006005090208900670530600000000050831600"
-# test_game_solution = "Not sure what the solution is"
-# test_grid = Grid(test_game, test_game_solution)
-# test_grid.test_solve()
-# print(test_grid.cells[74].candidates)
-# print(test_grid.cells[79].candidates)
-# print(test_grid.cells[80].candidates)
-# print(test_grid.cells[70].candidates)
-# print(test_grid.cells[71].candidates)
-# print(test_grid.cells[26].candidates)
 
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
-# first cell that has a lone candidate is cell 68 with lone candidate 4
+
