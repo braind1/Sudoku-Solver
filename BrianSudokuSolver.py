@@ -75,18 +75,13 @@ class Grid:
         self.cells: List[Cell] = []
         # create all 81 instances of cell, then add them to the list of cells
         self.cell_generate(game)
-        # create a temporary list for all the cells in the same row as the passed cell
-        self._current_row: List[Cell] = []
-        # create a temporary list for all the cells in the same column as the passed cell
-        self._current_column: List[Cell] = []
-        # create a temporary list for all the cells in the same block as the passed cell
-        self._current_block: List[Cell] = []
-        # create a list of the temporary lists so the function can iterate over all 3 lists
-        self._shared_row_column_block: List[list] = [self._current_row, self._current_column, self._current_block]
         # create the solution as an attribute to check against later
         self.full_solution: List[str] = list(game_solution)
         # create a temporary list of potential lone candidates
         self._potential_lone_candidates: List[int] = []
+        # populate the lists of shared houses for each cell
+        # self.cell_candidates_generate()
+        self.solve_techniques: List[Callable] = [self.single_cand_solve, self.full_grid_lone_candidates]
 
     def cell_generate(self, game: str):
         # iterate for all 81 cells
@@ -106,6 +101,7 @@ class Grid:
     def cell_candidates_generate(self):
         # iterate the shared house generate for every cell in the list of cells
         map(self.full_attribute_find, self.cells)
+        # TODO: make the map work
 
     @staticmethod
     # create a function that removes givens and solutions of test cell from the candidates list of cell of interest
@@ -142,6 +138,7 @@ class Grid:
     # define a function that finds all 3 shared attributes (row, column, and block)
     def full_attribute_find(self, cell_of_interest: Cell):
         # repeat for all 3 shared attributes
+        # map(self.single_shared_attribute_find, cell_of_interest.shared_house)
         for attr in range(len(cell_of_interest.shared_house)):
             # call the function to append the appropriate list (attr) when given the cell of interest
             self.single_shared_attribute_find(cell_of_interest, attr)
@@ -149,6 +146,7 @@ class Grid:
     # define a function that calls candidate check and is passed the list of cells with a shared attribute
     def row_candidate_modify(self, cell_of_interest: Cell, attr: int):
         # repeat candidate check for all cells in the shared list
+        # map(self.candidate_check, cell_of_interest.shared_house[attr])
         for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
             # calls the candidate check function with the nth element of the appropriate list (attr)
             self.candidate_check(cell_of_interest, cell_of_interest.shared_house[attr][test_cell_index])
@@ -156,6 +154,7 @@ class Grid:
     # create a function that modifies the candidates list of a cell based on all 3 attributes
     def full_candidate_modify(self, cell_of_interest: Cell):
         # call the function to find all the cells that have shared attributes
+        # TODO - want to populate the shared houses list after cell generation, not after everytime a cell is passed
         self.full_attribute_find(cell_of_interest)
         # repeat the row modify for all 3 attributes
         for attr in range(len(cell_of_interest.shared_house)):
@@ -173,13 +172,18 @@ class Grid:
     # define a function that promotes a candidate to a solution
     def solution_promote(self):
         # iterates over all 81 cells
-        for i in range(len(self.cells)):
+        for cell in range(len(self.cells)):
             # check if there is only one candidate
-            if len(self.cells[i].candidates) == 1:
+            if len(self.cells[cell].candidates) == 1:
                 # promote the single candidate to a solution
-                self.cells[i].solution = self.cells[i].candidates[0]
-                # clear the candidates list once the single candidate is a solution
-                self.cells[i].candidates.clear()
+                self.cells[cell].set_solution(self.cells[cell].candidates[0])
+
+    # define a function that finds all the simple candidates and promotes them
+    def single_cand_solve(self):
+        # call the function to find the single candidates
+        self.full_grid_candidates()
+        # call the promotion function
+        self.solution_promote()
 
     # define a function that prints the solved sudoku as a single string
     def solution_print(self):
@@ -207,10 +211,8 @@ class Grid:
         _current_unsolved_index = 1
         # while cells are still unsolved
         while _current_unsolved[_current_unsolved_index] != _current_unsolved[_current_unsolved_index - 1]:
-            # generate the candidates list for all the cells
-            self.full_grid_candidates()
-            # promote all the single candidates to solutions
-            self.solution_promote()
+            # apply the basic solving technique
+            self.single_cand_solve()
             # append the current unsolved list to know whether to continue the loop
             _current_unsolved.append(self.number_unsolved())
             # iterate the index being checked for
@@ -305,8 +307,8 @@ class Grid:
         # return the list of candidates lists
         return _shared_house_candidates
 
-    # define a function that checks if the cell of interest's (coi) candidate list is in the temporary list of candidate lists
-    def coi_in_shared_house_candidates_list(self, cell_of_interest: Cell, attr: int):
+    # define a function that checks if the cell of interest's candidate list is in the temporary list of candidate lists
+    def naked_pair_in_shared_house(self, cell_of_interest: Cell, attr: int):
         # create the temporary list of candidate lists in the specific shared house
         _temp_shared_house_candidates = self.shared_house_candidates_list(cell_of_interest, attr)
         # check if the cell of interest has 2 candidates and its candidates list is in the temporary list of candidates lists
@@ -319,14 +321,18 @@ class Grid:
     # define a function that removes the cell of interest's candidates from all cells in the shared house
     def naked_pair_candidate_removal(cell_of_interest: Cell, attr: int):
         # iterates for all test cells in the shared house
-        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
+        for test_cell in cell_of_interest.shared_house[attr]:
             # checks if the test cell isn't the cell of interest and the test cell isn't the naked pair
-            if cell_of_interest.shared_house[attr][test_cell_index] is not cell_of_interest \
-                    and cell_of_interest.shared_house[attr][test_cell_index].candidates != cell_of_interest.candidates:
+            if test_cell is not cell_of_interest and test_cell.candidates != cell_of_interest.candidates:
                 # sets the test cell's candidates to the remaining candidates after removing the cell of interest's candidates
-                cell_of_interest.shared_house[attr][test_cell_index].candidates = \
-                    list(set(cell_of_interest.shared_house[attr][test_cell_index].candidates).difference(
-                        cell_of_interest.candidates))
+                test_cell.candidates = list(set(test_cell.candidates).difference(cell_of_interest.candidates))
+
+    # define a function that repeats the naked pair check for all shared houses
+    def naked_pair_full_house(self, cell_of_interest: Cell):
+        # repeat the function for all shared houses
+        for attr in range(len(cell_of_interest.shared_house)):
+            # call the naked pair find for the specific house
+            self.naked_pair_in_shared_house(cell_of_interest, attr)
 
     # define a function that checks if the candidates list of cell has length 2
     def candidate_len_check(self, cell_of_interest: int) -> bool:
