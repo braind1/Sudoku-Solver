@@ -312,7 +312,21 @@ class Grid:
         # check if the cell of interest has 2 candidates and its candidates list is in the temporary list of candidates lists
         if len(cell_of_interest.candidates) == 2 and cell_of_interest.candidates in _temp_shared_house_candidates:
             # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
-            # TODO - write the removal function
+            # TODO - does this function make sense and work correctly?
+            self.naked_pair_candidate_removal(cell_of_interest, attr)
+
+    @staticmethod
+    # define a function that removes the cell of interest's candidates from all cells in the shared house
+    def naked_pair_candidate_removal(cell_of_interest: Cell, attr: int):
+        # iterates for all test cells in the shared house
+        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
+            # checks if the test cell isn't the cell of interest and the test cell isn't the naked pair
+            if cell_of_interest.shared_house[attr][test_cell_index] is not cell_of_interest \
+                    and cell_of_interest.shared_house[attr][test_cell_index].candidates != cell_of_interest.candidates:
+                # sets the test cell's candidates to the remaining candidates after removing the cell of interest's candidates
+                cell_of_interest.shared_house[attr][test_cell_index].candidates = \
+                    list(set(cell_of_interest.shared_house[attr][test_cell_index].candidates).difference(
+                        cell_of_interest.candidates))
 
     # define a function that checks if the candidates list of cell has length 2
     def candidate_len_check(self, cell_of_interest: int) -> bool:
@@ -412,6 +426,4 @@ med_grid = Grid(game2, game2_solution)
 # apply the level 2 algorithm to the game
 med_grid.lev2_solve()
 
-
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
-
