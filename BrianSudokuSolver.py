@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 
 class Cell:
@@ -61,6 +61,12 @@ class Cell:
         self.block = 3 * self._aisle_belt_list[1] + self._aisle_belt_list[0] - 3
         # print(f'{self.block}')
 
+    # define a function to set a solution and clear the candidates afterwards
+    def set_solution(self, solution: int):
+        # set the solution to the solution
+        self.solution = solution
+        # clear the candidates list
+        self.candidates.clear()
 
 class Grid:
     def __init__(self, game, game_solution):
@@ -97,7 +103,7 @@ class Grid:
 
     @staticmethod
     # create a function that removes givens and solutions of test cell from the candidates list of cell of interest
-    # takes the cell numbers (starting at 0) as arguments cell of interest and test cell
+    # takes the instance of the cells as arguments cell of interest and test cell
     def candidate_check(cell_of_interest: Cell, test_cell: Cell):
         # executes if the given is currently in the candidates list, ie given != 0
         if test_cell.given in cell_of_interest.candidates:
@@ -174,7 +180,7 @@ class Grid:
     # define a function that prints the solved sudoku as a single string
     def solution_print(self):
         # create an empty string to add the solutions to
-        solution_string = ''
+        solution_string = '  '
         # iterate for all 81 cells
         for n in range(len(self.cells)):
             # concatenate the solution string with the nth Cell's solution
@@ -219,18 +225,14 @@ class Grid:
         if num_matches == 81:
             return True
         else:
+            print(f"s:{''.join(self.full_solution)}")
             return False
 
     @staticmethod
-    # TODO: this function is not being passed the correct test cells (needs to take test cells from the shared row column block list)
     # define a function that takes an instance of a cell, a single candidate index, and a test cell and checks if the candidate is in the test cell
-    def lone_candidate(cell_of_interest: Cell, candidate_index: int, test_cell: Cell) -> bool:
-        # create a test to help debug
-        if not candidate_index < len(cell_of_interest.candidates):
-            pass
+    def lone_candidate(candidate: int, test_cell: Cell) -> bool:
         # checks if the test cell has no candidates and if it does, checks if the candidate of the cell of interest is in the test cell's candidate list
-        if len(test_cell.candidates) == 0 or len(cell_of_interest.candidates) == 0 \
-                or cell_of_interest.candidates[candidate_index] in test_cell.candidates:
+        if candidate in test_cell.candidates:
             # if the candidate is in the test cell's candidate, return true
             return True
         else:
@@ -240,13 +242,17 @@ class Grid:
     # define a function that repeats the lone candidate search for all candidates in the test cell given
     def lone_candidate_full_cell(self, cell_of_interest: Cell, test_cell: Cell):
         # iterates the lone candidate search for all the candidates of the test cell
-        for candidate_index in range(len(cell_of_interest.candidates)):
+        for candidate in cell_of_interest.candidates:
             # assigns a boolean variable that is true if the candidate is not a lone candidate
-            is_not_lone_candidate: bool = self.lone_candidate(cell_of_interest, candidate_index, test_cell)
-            # checks if the lone candidate was found
-            if not is_not_lone_candidate:
-                # if the candidate was not found, it is a potential lone candidate for the cell of interest
-                self._potential_lone_candidates.append(cell_of_interest.candidates[candidate_index])
+            is_potential_lone_candidate: bool = self.lone_candidate(candidate, test_cell)
+            # checks if the lone candidate was found.
+            # if the potential lone candidate has already been found, it is not a lone candidate
+            if is_potential_lone_candidate and candidate in self._potential_lone_candidates:
+                # remove the potential lone candidate because it is not a lone candidate
+                self._potential_lone_candidates.remove(candidate)
+            if not is_potential_lone_candidate and candidate not in self._potential_lone_candidates:
+                # add the potential lone candidate to the list of potential lone candidates
+                self._potential_lone_candidates.append(candidate)
             # if the candidate was found, continue the search
 
     # define a function that checks for lone candidates in all test cells in the shared attribute list
@@ -254,11 +260,11 @@ class Grid:
         # iterates over all test cells in the shared row/column/block (chosen based on attr)
         for test_cell_index in range(len(self._shared_row_column_block[attr])):
             # checks if the test cell is the cell of interest
-            if self._shared_row_column_block[attr][test_cell_index] == cell_of_interest:
+            if self._shared_row_column_block[attr][test_cell_index] is cell_of_interest:
                 # does nothing, but continues for the next iteration of the for loop
                 continue
-            # if the test cell isn't the cell of interest, pass it to the lone candidate check for a full cell
-            else:
+            # if the test cell isn't the cell of interest and has candidates, pass it to the lone candidate check for a full cell
+            elif len(self._shared_row_column_block[attr][test_cell_index].candidates) > 0:
                 # call the lone candidate check for a full cell
                 self.lone_candidate_full_cell(cell_of_interest, self._shared_row_column_block[attr][test_cell_index])
 
@@ -272,13 +278,13 @@ class Grid:
             self.lone_candidate_single_attr(cell_of_interest, attr)
 
     # define a function that checks if the potential lone candidates list only has 1 candidate
-    def potential_candidate_len_check(self, cell_of_interest: int):
+    def potential_candidate_len_check(self, cell_of_interest: Cell):
         # if there is only one potential lone candidate, that is a lone candidate and can be promoted to a solution
         if len(self._potential_lone_candidates) == 1:
             # set the solution of the cell of interest to its lone candidate
-            self.cells[cell_of_interest].solution = self._potential_lone_candidates[0]
+            cell_of_interest.solution = self._potential_lone_candidates[0]
             # clear the candidates list of the cell after a solution has been promoted
-            self.cells[cell_of_interest].candidates.clear()
+            cell_of_interest.candidates.clear()
         # clear the potential candidates list after it has been promoted (len == 1) or hasn't (len > 1)
         self._potential_lone_candidates.clear()
 
@@ -286,6 +292,8 @@ class Grid:
     def grid_lone_candidate_search(self, attr: int):
         # iterate over all 81 cells
         for cell_index in range(len(self.cells)):
+            # update the candidates list for the cell of interest before doing the lone candidate search
+            self.full_candidate_modify(self.cells[cell_index])
             # check if the cell has no candidates
             if len(self.cells[cell_index].candidates) == 0:
                 # pass over the cell
@@ -297,7 +305,38 @@ class Grid:
                 self.full_attribute_find(self.cells[cell_index])
                 self.lone_candidate_single_attr(self.cells[cell_index], attr)
             # both ways, call the lone candidate length check to clear out the potential lone candidate list
-            self.potential_candidate_len_check(cell_index)
+            self.potential_candidate_len_check(self.cells[cell_index])
+
+    # iterate for all cells in the shared attribute(house), add all candidates in the house to a temporary list (except the cell of interest's candidates)
+    def temp_lone_candidate_list(self, cell_of_interest: Cell, attr: int) -> List[int]:
+        # create a temporary list of all candidates in the shared house (without adding the candidates from the cell of interest)
+        _temp_lone_candidate_list: List[int] = []
+        # iterate for all test cells in the shared house
+        for test_cell_index in range(len(self._shared_row_column_block[attr])):
+            # check if the test cell is the cell of interest
+            if self._shared_row_column_block[attr][test_cell_index] is not cell_of_interest:
+                # add the candidates to the temporary list as long as the test cell isn't the cell of interest
+                _temp_lone_candidate_list.extend(self._shared_row_column_block[attr][test_cell_index].candidates)
+        return _temp_lone_candidate_list
+
+    # define a function that iterates over all the candidates in the cell of interest, and checks them against the temporary candidates list
+    def potential_lone_candidate_search(self, cell_of_interest: Cell, attr: int):
+        # assign the result of the temporary lone candidate list to another local temporary list
+        _temp_house_candidates: List[int] = self.temp_lone_candidate_list(cell_of_interest, attr)
+        # iterate over all the candidates in the cell of interest
+        for candidate in cell_of_interest.candidates:
+            # check if the candidate is in the house's candidate list
+            if candidate not in _temp_house_candidates:
+                # if the candidate is not found elsewhere in the house, the candidate is the solution to the cell of interest
+                cell_of_interest.set_solution(candidate)
+
+    def full_cell_lone_candidate_search(self, cell_of_interest: Cell):
+        for attr in range(len(self._shared_row_column_block)):
+            self.potential_lone_candidate_search(cell_of_interest, attr)
+
+    def full_grid_lone_candidates(self):
+        for cell in self.cells:
+            self.full_cell_lone_candidate_search(cell)
 
     # define the level 2 solver that incorporates the lone candidate algorithm into the simple solver
     def lev2_solve(self):
@@ -307,12 +346,11 @@ class Grid:
         _current_unsolved_index = 1
         # while cells are still unsolved
         while _current_unsolved_lev2[_current_unsolved_index] != _current_unsolved_lev2[_current_unsolved_index - 1]:
-            # generate the candidates list for all the cells
-            self.full_grid_candidates()
-            # promote all the single candidates to solutions
-            self.solution_promote()
-            # complete the lone candidate search
-            self.grid_lone_candidate_search(1)
+            # call the simple solve algorithm as many times as it works
+            self.simple_solve()
+            # then move onto the lone candidate search
+            # self.grid_lone_candidate_search(0)
+            self.full_grid_lone_candidates()
             # append the current unsolved list to know whether to continue the loop
             _current_unsolved_lev2.append(self.number_unsolved())
             # iterate the index being checked for
