@@ -228,85 +228,6 @@ class Grid:
             print(f"s:{''.join(self.full_solution)}")
             return False
 
-    @staticmethod
-    # define a function that takes an instance of a cell, a single candidate index, and a test cell and checks if the candidate is in the test cell
-    def lone_candidate(candidate: int, test_cell: Cell) -> bool:
-        # checks if the test cell has no candidates and if it does, checks if the candidate of the cell of interest is in the test cell's candidate list
-        if candidate in test_cell.candidates:
-            # if the candidate is in the test cell's candidate, return true
-            return True
-        else:
-            # if the candidate is not found, could be a lone candidate
-            return False
-
-    # define a function that repeats the lone candidate search for all candidates in the test cell given
-    def lone_candidate_full_cell(self, cell_of_interest: Cell, test_cell: Cell):
-        # iterates the lone candidate search for all the candidates of the test cell
-        for candidate in cell_of_interest.candidates:
-            # assigns a boolean variable that is true if the candidate is not a lone candidate
-            is_potential_lone_candidate: bool = self.lone_candidate(candidate, test_cell)
-            # checks if the lone candidate was found.
-            # if the potential lone candidate has already been found, it is not a lone candidate
-            if is_potential_lone_candidate and candidate in self._potential_lone_candidates:
-                # remove the potential lone candidate because it is not a lone candidate
-                self._potential_lone_candidates.remove(candidate)
-            if not is_potential_lone_candidate and candidate not in self._potential_lone_candidates:
-                # add the potential lone candidate to the list of potential lone candidates
-                self._potential_lone_candidates.append(candidate)
-            # if the candidate was found, continue the search
-
-    # define a function that checks for lone candidates in all test cells in the shared attribute list
-    def lone_candidate_single_attr(self, cell_of_interest: Cell, attr: int):
-        # iterates over all test cells in the shared row/column/block (chosen based on attr)
-        for test_cell_index in range(len(self._shared_row_column_block[attr])):
-            # checks if the test cell is the cell of interest
-            if self._shared_row_column_block[attr][test_cell_index] is cell_of_interest:
-                # does nothing, but continues for the next iteration of the for loop
-                continue
-            # if the test cell isn't the cell of interest and has candidates, pass it to the lone candidate check for a full cell
-            elif len(self._shared_row_column_block[attr][test_cell_index].candidates) > 0:
-                # call the lone candidate check for a full cell
-                self.lone_candidate_full_cell(cell_of_interest, self._shared_row_column_block[attr][test_cell_index])
-
-    # define a function that checks the lone candidates for all shared attributes
-    def lone_candidate_all_attrs(self, cell_of_interest: Cell):
-        # regenerate the full list of cells with shared attributes
-        self.full_attribute_find(cell_of_interest)
-        # iterate the function for all shared attributes
-        for attr in range(len(self._shared_row_column_block)):
-            # call the lone candidate search for a single attribute
-            self.lone_candidate_single_attr(cell_of_interest, attr)
-
-    # define a function that checks if the potential lone candidates list only has 1 candidate
-    def potential_candidate_len_check(self, cell_of_interest: Cell):
-        # if there is only one potential lone candidate, that is a lone candidate and can be promoted to a solution
-        if len(self._potential_lone_candidates) == 1:
-            # set the solution of the cell of interest to its lone candidate
-            cell_of_interest.solution = self._potential_lone_candidates[0]
-            # clear the candidates list of the cell after a solution has been promoted
-            cell_of_interest.candidates.clear()
-        # clear the potential candidates list after it has been promoted (len == 1) or hasn't (len > 1)
-        self._potential_lone_candidates.clear()
-
-    # define a function that calls the lone candidate search for all cells that have candidates
-    def grid_lone_candidate_search(self, attr: int):
-        # iterate over all 81 cells
-        for cell_index in range(len(self.cells)):
-            # update the candidates list for the cell of interest before doing the lone candidate search
-            self.full_candidate_modify(self.cells[cell_index])
-            # check if the cell has no candidates
-            if len(self.cells[cell_index].candidates) == 0:
-                # pass over the cell
-                continue
-            # if the cell has candidates, call the lone candidate search function.
-            # the lone candidate only needs to exist in one attribute for it to be lone
-            else:
-                # regenerate the full list of cells with shared attributes
-                self.full_attribute_find(self.cells[cell_index])
-                self.lone_candidate_single_attr(self.cells[cell_index], attr)
-            # both ways, call the lone candidate length check to clear out the potential lone candidate list
-            self.potential_candidate_len_check(self.cells[cell_index])
-
     # iterate for all cells in the shared attribute(house), add all candidates in the house to a temporary list (except the cell of interest's candidates)
     def temp_lone_candidate_list(self, cell_of_interest: Cell, attr: int) -> List[int]:
         # create a temporary list of all candidates in the shared house (without adding the candidates from the cell of interest)
@@ -336,6 +257,7 @@ class Grid:
 
     def full_grid_lone_candidates(self):
         for cell in self.cells:
+            self.full_attribute_find(cell)
             self.full_cell_lone_candidate_search(cell)
 
     # define the level 2 solver that incorporates the lone candidate algorithm into the simple solver
