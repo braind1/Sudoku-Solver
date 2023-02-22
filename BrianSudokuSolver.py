@@ -291,6 +291,29 @@ class Grid:
         # at the end, check whether the solved solution matches the given solution, and print the output
         print(self.solve_check())
 
+    @staticmethod
+    # define a function that makes a list of all the candidates lists in a shared house
+    def shared_house_candidates_list(cell_of_interest: Cell, attr: int) -> List[list]:
+        # initialize a temporary empty list
+        _shared_house_candidates: List[list] = []
+        # iterate over all test cells in the specific shared house
+        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
+            # check if the test cell is the cell of interest
+            if cell_of_interest.shared_house[attr][test_cell_index] is not cell_of_interest:
+                # if the test cell isn't the cell of interest, add its list of candidates to the temporary list of candidate lists
+                _shared_house_candidates.append(cell_of_interest.shared_house[attr][test_cell_index].candidates)
+        # return the list of candidates lists
+        return _shared_house_candidates
+
+    # define a function that checks if the cell of interest's (coi) candidate list is in the temporary list of candidate lists
+    def coi_in_shared_house_candidates_list(self, cell_of_interest: Cell, attr: int):
+        # create the temporary list of candidate lists in the specific shared house
+        _temp_shared_house_candidates = self.shared_house_candidates_list(cell_of_interest, attr)
+        # check if the cell of interest has 2 candidates and its candidates list is in the temporary list of candidates lists
+        if len(cell_of_interest.candidates) == 2 and cell_of_interest.candidates in _temp_shared_house_candidates:
+            # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
+            # TODO - write the removal function
+
     # define a function that checks if the candidates list of cell has length 2
     def candidate_len_check(self, cell_of_interest: int) -> bool:
         # if the length of the candidates list is 2
