@@ -314,9 +314,13 @@ class Grid:
         # create the temporary list of candidate lists in the specific shared house
         _temp_shared_house_candidates = self.shared_house_candidates_list(cell_of_interest, attr)
         # check if the cell of interest has 2 candidates and its candidates list is in the temporary list of candidates lists
+        # TODO - does the logic work for the 3 candidate version?
         if len(cell_of_interest.candidates) == 2 and cell_of_interest.candidates in _temp_shared_house_candidates:
             # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
             # TODO - does this function make sense and work correctly?
+            self.naked_pair_candidate_removal(cell_of_interest, attr)
+        elif len(cell_of_interest.candidates) == 3 and _temp_shared_house_candidates.count(cell_of_interest.candidates) == 2:
+            # removes the candidates from all cells containing those candidates except the 2 other cells with the same candidates lists
             self.naked_pair_candidate_removal(cell_of_interest, attr)
 
     @staticmethod
