@@ -77,13 +77,14 @@ class Grid:
         self.cell_generate(game)
         # create the solution as an attribute to check against later
         self.full_solution: List[str] = list(game_solution)
-        # create a temporary list of potential lone candidates
-        self._potential_lone_candidates: List[int] = []
         # populate the lists of shared houses for each cell
-        # self.cell_candidates_generate()
+        # self.cell_shared_house_generate()
         # create a list of the solving techniques the grid has
-        self.solve_techniques: List[Callable] = [self.single_cand_solve, self.full_grid_lone_candidates,
+        self.solve_techniques: List[Callable] = [self.single_cand_solve,
+                                                 self.full_grid_lone_candidates,
                                                  self.naked_pair_full_grid]
+        # create a variable to track the number of times a solving technique was used
+        self.num_iterations: int = 0
 
     def cell_generate(self, game: str):
         # iterate for all 81 cells
@@ -100,9 +101,9 @@ class Grid:
                 self.cells[cells].solution = self.cells[cells].given
 
     # define a function that populates the shared house lists immediately after cell generation
-    def cell_candidates_generate(self):
+    def cell_shared_house_generate(self):
         # iterate the shared house generate for every cell in the list of cells
-        map(self.full_attribute_find, self.cells)
+        map(Grid.full_attribute_find, self.cells)
         # TODO: make the map work
 
     @staticmethod
@@ -231,6 +232,7 @@ class Grid:
             if self.cells[a].solution == int(self.full_solution[a]):
                 num_matches += 1
         if num_matches == 81:
+            print(f"s:{''.join(self.full_solution)}")
             return True
         else:
             print(f"s:{''.join(self.full_solution)}")
@@ -299,13 +301,13 @@ class Grid:
     # define a function that makes a list of all the candidates lists in a shared house
     def shared_house_candidates_list(cell_of_interest: Cell, attr: int) -> List[list]:
         # initialize a temporary empty list
-        _shared_house_candidates: List[list] = []
+        _shared_house_candidates: List[List[int]] = []
         # iterate over all test cells in the specific shared house
-        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
+        for test_cell in cell_of_interest.shared_house[attr]:
             # check if the test cell is the cell of interest
-            if cell_of_interest.shared_house[attr][test_cell_index] is not cell_of_interest:
+            if test_cell is not cell_of_interest:
                 # if the test cell isn't the cell of interest, add its list of candidates to the temporary list of candidate lists
-                _shared_house_candidates.append(cell_of_interest.shared_house[attr][test_cell_index].candidates)
+                _shared_house_candidates.append(test_cell.candidates)
         # return the list of candidates lists
         return _shared_house_candidates
 
@@ -319,7 +321,8 @@ class Grid:
             # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
             # TODO - does this function make sense and work correctly?
             self.naked_pair_candidate_removal(cell_of_interest, attr)
-        elif len(cell_of_interest.candidates) == 3 and _temp_shared_house_candidates.count(cell_of_interest.candidates) == 2:
+        elif len(cell_of_interest.candidates) == 3 and _temp_shared_house_candidates.count(
+                cell_of_interest.candidates) == 2:
             # removes the candidates from all cells containing those candidates except the 2 other cells with the same candidates lists
             self.naked_pair_candidate_removal(cell_of_interest, attr)
 
@@ -332,6 +335,8 @@ class Grid:
             if test_cell is not cell_of_interest and test_cell.candidates != cell_of_interest.candidates:
                 # sets the test cell's candidates to the remaining candidates after removing the cell of interest's candidates
                 test_cell.candidates = list(set(test_cell.candidates).difference(cell_of_interest.candidates))
+                # order the candidates in case the set takes them out of order
+                test_cell.candidates.sort()
 
     # define a function that repeats the naked pair check for all shared houses
     def naked_pair_full_house(self, cell_of_interest: Cell):
@@ -349,85 +354,51 @@ class Grid:
         # TODO: also should work with a map
         # map(self.naked_pair_full_house, self.cells)
 
-    # define a function that checks if the candidates list of cell has length 2
-    def candidate_len_check(self, cell_of_interest: int) -> bool:
-        # if the length of the candidates list is 2
-        if len(self.cells[cell_of_interest].candidates) == 2:
-            # return True
-            return True
-        # if the length isn't 2
-        # TODO: is else false assumed?
-        else:
-            # return False
-            return False
+    # define a function that performs a function for the maximum number of times it reduces the candidates in the grid
+    def max_function_iterations(self, functions: List[Callable]):
+        # create a variable for the current number of candidates in the grid
+        _number_candidates: int = self.candidates_in_grid()
+        # create a variable for the number of candidates in the grid in the previous iteration
+        _previous_number_candidates: int = 729
+        # iterate while the solving technique reduces the number of candidates
+        while _previous_number_candidates > _number_candidates:
+            # call the function passed
+            functions[0]()
+            # update the number of candidates for the previous and current iterations
+            _previous_number_candidates = _number_candidates
+            _number_candidates = self.candidates_in_grid()
+            # increment the number of iterations performed
+            self.num_iterations += 1
+        # check if there is only function being passed
+        if len(functions) > 1 and _number_candidates > 0:
+            # call the recursion with the remaining functions
+            self.max_function_iterations(functions[1:])
 
-    # define a function that performs the length check for all cells in a single shared attribute list and removes all false cases
-    def single_attr_cand_len_remove(self, attr: int):
-        # iterate over all cells in the single shared attribute list
-        for cell_index in range(len(self._shared_row_column_block[attr])):
-            # if the length check returned true, length is 2 and the cell can be kept
-            if self.candidate_len_check(cell_index):
-                # do nothing and continue the loop
-                continue
-            # if the length check is false, length isn't 2 and the cell should be removed
-            else:
-                # remove the cell_index cell from the single shared attribute list
-                self._shared_row_column_block[attr].remove(self._shared_row_column_block[attr][cell_index])
+    # define a function that finds the total number of candidates in the grid
+    def candidates_in_grid(self) -> int:
+        # initialize the number of candidates to 0
+        _total_grid_candidates: int = 0
+        # iterate for all cells in the grid
+        for cell in self.cells:
+            # add the number of candidates in each cell
+            _total_grid_candidates += len(cell.candidates)
+        # return the total count
+        return _total_grid_candidates
 
-    # define a function that checks if a candidate of 2 cells are the same
-    def single_shared_candidate(self, cell_of_interest: int, test_cell: int, candidate_index: int) -> bool:
-        # check the candidate at candidate index of both cells is the same
-        if self.cells[cell_of_interest].candidates[candidate_index] == self.cells[test_cell].candidates[cell_of_interest]:
-            return True
+    # define a function that gives the max function iteration an incrementing list of solving techniques
+    def general_solver(self):
+        # iterate for all solving techniques
+        for function_index in range(len(self.solve_techniques)):
+            # give the max function iterations all functions up to the function index
+            self.max_function_iterations(self.solve_techniques[:function_index + 1])
+            # once the sudoku is solved, break out of the loop
+            if self.solve_check():
+                break
 
-    # define a function that repeats the single shared candidate search for both candidates in the cell of interest
-    def cell_shared_candidates(self, cell_of_interest: int, test_cell: int):
-        # initialize the number of matches to 0
-        _num_matches = 0
-        # iterate for both candidates
-        for candidate_index in range(len(self.cells[cell_of_interest].candidates)):
-            # add the boolean value (0 for false, 1 for true) based on the result of the single candidate check
-            _num_matches += self.single_shared_candidate(cell_of_interest, test_cell, candidate_index)
-        # if both of the candidates match, the naked pair has been found
-        if _num_matches == 2:
-            # TODO: not sure what the output should be here to indicate that the naked pair has been found and to remove those candidates from the rest of the cells
-            return True
-        else:
-            return False
-
-    # define a function that removes the candidates of one cell from another
-    def single_cell_candidate_remove(self, cell_of_interest: int, test_cell: int):
-        # iterate over all the candidates in the cell of interest
-        for candidate_index in range(len(self.cells[cell_of_interest].candidates)):
-            # remove the candidate in the cell of interest from the test cell
-            self.cells[test_cell].candidates.remove(self.cells[cell_of_interest].candidates[candidate_index])
-
-    # define a function that repeats the single cell candidate removal function for all cells in the shared attribute list except for the naked pair cell
-    def full_shared_attr_cand_remove(self, cell_of_interest: int, attr: int):
-        # iterate for all cells in the shared attribute list
-        for cell_index in range(len(self._shared_row_column_block[attr])):
-            # if the test cell has the same candidates as the cell of interest, do nothing
-            if self._shared_row_column_block[attr][cell_index].candidates == self._shared_row_column_block[attr][cell_of_interest].candidates:
-                continue
-            # if the test cell isn't the naked pair, remove the naked pair candidates from the test cell
-            else:
-                # call the removal function on the test cell
-                self.single_cell_candidate_remove(cell_of_interest, self._shared_row_column_block[attr][cell_index])
-
-    # define a function that calls the length removal function, then checks the remaining cells with the single candidate check
-    def single_attr_naked_pair_find(self, cell_of_interest: int, attr: int):
-        # call the removal function to leave only cells with length 2
-        self.single_attr_cand_len_remove(attr)
-        # then repeat the shared candidate search for all test cells in the shared attribute list
-        for cell_index in range(len(self._shared_row_column_block[attr])):
-            # check if the cell of interest was a naked pair with the test cell
-            if self.cell_shared_candidates(cell_of_interest, self._shared_row_column_block[attr][cell_index]):
-                # then remove the candidates in cell of interest from the other cells in the shared attribute (except the cell with the same candidates)
-                # TODO: write an iterable removal function
-                self.full_shared_attr_cand_remove(cell_of_interest, attr)
-            # if the two cells aren't a naked pair, do nothing
-            else:
-                continue
+    # def simple_solve2(self):
+        # self.max_function_iterations(self.solve_techniques[0])
+        # print(self.solve_check())
+        # print(f'Solving took {self.num_iterations} iterations')
 
 
 game1 = "004300209005009001070060043006002087190007400050083000600000105003508690042910300"
@@ -437,14 +408,23 @@ game1_solution = "86437125932584976197126584343619258719865743225748391668973412
 game2 = "009070035510040206700006001600007093023010000001000500800000049190000058007000600"
 game2_solution = "269871435518349276734256981685427193423915867971683524856132749192764358347598612"
 
+# game 3 requires naked pairs and pointing pairs to solve
+game3 = "103065000700020000500300000002650030001430600000017205000006050004080060060040010"
+game3_solution = "000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
 # solves the full simple grid
-# simple_grid.simple_solve()
+# simple_grid.simple_solve2()
 
 # instantiate the more difficult sudoku
-med_grid = Grid(game2, game2_solution)
+# med_grid = Grid(game2, game2_solution)
 # apply the level 2 algorithm to the game
-med_grid.lev2_solve()
+# med_grid.lev2_solve()
+
+# instantiate the hard sudoku
+hard_grid = Grid(game3, game3_solution)
+# call in general solver
+hard_grid.general_solver()
 
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
