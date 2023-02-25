@@ -78,7 +78,7 @@ class Grid:
         # create the solution as an attribute to check against later
         self.full_solution: List[str] = list(game_solution)
         # populate the lists of shared houses for each cell
-        # self.cell_shared_house_generate()
+        self.cell_shared_house_generate()
         # create a list of the solving techniques the grid has
         self.solve_techniques: List[Callable] = [self.single_cand_solve,
                                                  self.full_grid_lone_candidates,
@@ -102,9 +102,9 @@ class Grid:
 
     # define a function that populates the shared house lists immediately after cell generation
     def cell_shared_house_generate(self):
-        # iterate the shared house generate for every cell in the list of cells
-        map(Grid.full_attribute_find, self.cells)
-        # TODO: make the map work
+        # iterate the shared house generation for every cell in the list of cells
+        for cell in self.cells:
+            self.full_attribute_find(cell)
 
     @staticmethod
     # create a function that removes givens and solutions of test cell from the candidates list of cell of interest
@@ -141,7 +141,6 @@ class Grid:
     # define a function that finds all 3 shared attributes (row, column, and block)
     def full_attribute_find(self, cell_of_interest: Cell):
         # repeat for all 3 shared attributes
-        # map(self.single_shared_attribute_find, cell_of_interest.shared_house)
         for attr in range(len(cell_of_interest.shared_house)):
             # call the function to append the appropriate list (attr) when given the cell of interest
             self.single_shared_attribute_find(cell_of_interest, attr)
@@ -149,16 +148,12 @@ class Grid:
     # define a function that calls candidate check and is passed the list of cells with a shared attribute
     def row_candidate_modify(self, cell_of_interest: Cell, attr: int):
         # repeat candidate check for all cells in the shared list
-        # map(self.candidate_check, cell_of_interest.shared_house[attr])
         for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
             # calls the candidate check function with the nth element of the appropriate list (attr)
             self.candidate_check(cell_of_interest, cell_of_interest.shared_house[attr][test_cell_index])
 
     # create a function that modifies the candidates list of a cell based on all 3 attributes
     def full_candidate_modify(self, cell_of_interest: Cell):
-        # call the function to find all the cells that have shared attributes
-        # TODO - want to populate the shared houses list after cell generation, not after everytime a cell is passed
-        self.full_attribute_find(cell_of_interest)
         # repeat the row modify for all 3 attributes
         for attr in range(len(cell_of_interest.shared_house)):
             # calls the row modify function for cell of interest and all the attributes
@@ -167,7 +162,6 @@ class Grid:
     # create a function that calls the full candidate modify function for all cells in the grid
     def full_grid_candidates(self):
         # repeat for all 81 cells in the grid
-        # map(self.full_candidate_modify, self.cells) - TODO: attempted to use the map function to replace the loop, didn't work
         for cell_index in range(len(self.cells)):
             # call the full candidate modify on the ath cell of the grid
             self.full_candidate_modify(self.cells[cell_index])
@@ -401,8 +395,6 @@ class Grid:
         for function_index in range(len(self.solve_techniques)):
             # give the max function iterations all functions up to the function index
             self.max_function_iterations(self.solve_techniques[:function_index + 1])
-            # print the current solution
-            # self.solution_print()
             # once the sudoku is solved, break out of the loop
             if self.solve_check():
                 break
