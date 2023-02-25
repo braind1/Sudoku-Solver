@@ -232,10 +232,10 @@ class Grid:
             if self.cells[a].solution == int(self.full_solution[a]):
                 num_matches += 1
         if num_matches == 81:
-            print(f"s:{''.join(self.full_solution)}")
+            print(f"s:{''.join(self.full_solution)}", 'True')
             return True
         else:
-            print(f"s:{''.join(self.full_solution)}")
+            print(f"s:{''.join(self.full_solution)}", 'False')
             return False
 
     @staticmethod
@@ -272,8 +272,12 @@ class Grid:
 
     # define a function that finds the lone candidates of every cell
     def full_grid_lone_candidates(self):
+        # iterate for all cells in the grid
         for cell in self.cells:
+            # apply the full lone candidate method to the cell
             self.full_cell_lone_candidate_search(cell)
+            # update the candidates list of all cells in the grid
+            self.full_grid_candidates()
 
     # define the level 2 solver that incorporates the lone candidate algorithm into the simple solver
     def lev2_solve(self):
@@ -364,6 +368,12 @@ class Grid:
         while _previous_number_candidates > _number_candidates:
             # call the function passed
             functions[0]()
+            # tell the user what function was used during the current iteration of solving
+            print('The technique used during this iteration was:', functions[0])
+            # print the current solution
+            self.solution_print()
+            # print the given solution
+            self.solve_check()
             # update the number of candidates for the previous and current iterations
             _previous_number_candidates = _number_candidates
             _number_candidates = self.candidates_in_grid()
@@ -391,6 +401,8 @@ class Grid:
         for function_index in range(len(self.solve_techniques)):
             # give the max function iterations all functions up to the function index
             self.max_function_iterations(self.solve_techniques[:function_index + 1])
+            # print the current solution
+            # self.solution_print()
             # once the sudoku is solved, break out of the loop
             if self.solve_check():
                 break
@@ -410,7 +422,7 @@ game2_solution = "26987143551834927673425698168542719342391586797168352485613274
 
 # game 3 requires naked pairs and pointing pairs to solve
 game3 = "103065000700020000500300000002650030001430600000017205000006050004080060060040010"
-game3_solution = "000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+game3_solution = "103065000706120503500370106472650031051432600630017245017296050004581060065743010"
 
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
@@ -418,9 +430,10 @@ game3_solution = "00000000000000000000000000000000000000000000000000000000000000
 # simple_grid.simple_solve2()
 
 # instantiate the more difficult sudoku
-# med_grid = Grid(game2, game2_solution)
+med_grid = Grid(game2, game2_solution)
 # apply the level 2 algorithm to the game
 # med_grid.lev2_solve()
+# med_grid.general_solver()
 
 # instantiate the hard sudoku
 hard_grid = Grid(game3, game3_solution)
