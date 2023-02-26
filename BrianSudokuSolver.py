@@ -27,7 +27,7 @@ class Cell:
         # create a list of cells in the same block
         self.shared_block: List[Cell] = []
         # create a list of those shared lists
-        self.shared_house: List[list] = [self.shared_row, self.shared_column, self.shared_block]
+        self.shared_houses: List[list] = [self.shared_row, self.shared_column, self.shared_block]
 
     # add the string method to print a basic string with all the information about the instance of a cell
     def __str__(self):
@@ -82,7 +82,8 @@ class Grid:
         # create a list of the solving techniques the grid has
         self.solve_techniques: List[Callable] = [self.single_cand_solve,
                                                  self.full_grid_lone_candidates,
-                                                 self.naked_pair_full_grid]
+                                                 self.naked_pair_full_grid,
+                                                 self.pointing_pairs_full_grid]
         # create a variable to track the number of times a solving technique was used
         self.num_iterations: int = 0
 
@@ -136,26 +137,26 @@ class Grid:
             # if the attribute (b) of the cell of interest (a) matches the attribute (b) of the test cell (f)
             if self.attribute_test(cell_of_interest, attr) == self.attribute_test(self.cells[test_cell], attr):
                 # append the corresponding attribute list (b) with test cell (f)
-                cell_of_interest.shared_house[attr].append(self.cells[test_cell])
+                cell_of_interest.shared_houses[attr].append(self.cells[test_cell])
 
     # define a function that finds all 3 shared attributes (row, column, and block)
     def full_attribute_find(self, cell_of_interest: Cell):
         # repeat for all 3 shared attributes
-        for attr in range(len(cell_of_interest.shared_house)):
+        for attr in range(len(cell_of_interest.shared_houses)):
             # call the function to append the appropriate list (attr) when given the cell of interest
             self.single_shared_attribute_find(cell_of_interest, attr)
 
     # define a function that calls candidate check and is passed the list of cells with a shared attribute
     def row_candidate_modify(self, cell_of_interest: Cell, attr: int):
         # repeat candidate check for all cells in the shared list
-        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
+        for test_cell_index in range(len(cell_of_interest.shared_houses[attr])):
             # calls the candidate check function with the nth element of the appropriate list (attr)
-            self.candidate_check(cell_of_interest, cell_of_interest.shared_house[attr][test_cell_index])
+            self.candidate_check(cell_of_interest, cell_of_interest.shared_houses[attr][test_cell_index])
 
     # create a function that modifies the candidates list of a cell based on all 3 attributes
     def full_candidate_modify(self, cell_of_interest: Cell):
         # repeat the row modify for all 3 attributes
-        for attr in range(len(cell_of_interest.shared_house)):
+        for attr in range(len(cell_of_interest.shared_houses)):
             # calls the row modify function for cell of interest and all the attributes
             self.row_candidate_modify(cell_of_interest, attr)
 
@@ -238,11 +239,11 @@ class Grid:
         # create a temporary list of all candidates in the shared house (without adding the candidates from the cell of interest)
         _temp_lone_candidate_list: List[int] = []
         # iterate for all test cells in the shared house
-        for test_cell_index in range(len(cell_of_interest.shared_house[attr])):
+        for test_cell_index in range(len(cell_of_interest.shared_houses[attr])):
             # check if the test cell is the cell of interest
-            if cell_of_interest.shared_house[attr][test_cell_index] is not cell_of_interest:
+            if cell_of_interest.shared_houses[attr][test_cell_index] is not cell_of_interest:
                 # add the candidates to the temporary list as long as the test cell isn't the cell of interest
-                _temp_lone_candidate_list.extend(cell_of_interest.shared_house[attr][test_cell_index].candidates)
+                _temp_lone_candidate_list.extend(cell_of_interest.shared_houses[attr][test_cell_index].candidates)
         # return the temporary list of candidates to search through
         return _temp_lone_candidate_list
 
@@ -260,7 +261,7 @@ class Grid:
     # define a function that calls the potential lone candidate search for all attributes in the house
     def full_cell_lone_candidate_search(self, cell_of_interest: Cell):
         # iterate over every attribute in the house
-        for attr in range(len(cell_of_interest.shared_house)):
+        for attr in range(len(cell_of_interest.shared_houses)):
             # search for the lone candidates
             self.potential_lone_candidate_search(cell_of_interest, attr)
 
@@ -301,7 +302,7 @@ class Grid:
         # initialize a temporary empty list
         _shared_house_candidates: List[List[int]] = []
         # iterate over all test cells in the specific shared house
-        for test_cell in cell_of_interest.shared_house[attr]:
+        for test_cell in cell_of_interest.shared_houses[attr]:
             # check if the test cell is the cell of interest
             if test_cell is not cell_of_interest:
                 # if the test cell isn't the cell of interest, add its list of candidates to the temporary list of candidate lists
@@ -319,8 +320,7 @@ class Grid:
             # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
             # TODO - does this function make sense and work correctly?
             self.naked_pair_candidate_removal(cell_of_interest, attr)
-        elif len(cell_of_interest.candidates) == 3 and _temp_shared_house_candidates.count(
-                cell_of_interest.candidates) == 2:
+        elif len(cell_of_interest.candidates) == 3 and _temp_shared_house_candidates.count(cell_of_interest.candidates) == 2:
             # removes the candidates from all cells containing those candidates except the 2 other cells with the same candidates lists
             self.naked_pair_candidate_removal(cell_of_interest, attr)
 
@@ -328,7 +328,7 @@ class Grid:
     # define a function that removes the cell of interest's candidates from all cells in the shared house
     def naked_pair_candidate_removal(cell_of_interest: Cell, attr: int):
         # iterates for all test cells in the shared house
-        for test_cell in cell_of_interest.shared_house[attr]:
+        for test_cell in cell_of_interest.shared_houses[attr]:
             # checks if the test cell isn't the cell of interest and the test cell isn't the naked pair
             if test_cell is not cell_of_interest and test_cell.candidates != cell_of_interest.candidates:
                 # sets the test cell's candidates to the remaining candidates after removing the cell of interest's candidates
@@ -339,7 +339,7 @@ class Grid:
     # define a function that repeats the naked pair check for all shared houses
     def naked_pair_full_house(self, cell_of_interest: Cell):
         # repeat the function for all shared houses
-        for attr in range(len(cell_of_interest.shared_house)):
+        for attr in range(len(cell_of_interest.shared_houses)):
             # call the naked pair find for the specific house
             self.naked_pair_in_shared_house(cell_of_interest, attr)
 
@@ -349,8 +349,72 @@ class Grid:
         for cell in self.cells:
             # call the naked pair function for its full house
             self.naked_pair_full_house(cell)
-        # TODO: also should work with a map
-        # map(self.naked_pair_full_house, self.cells)
+
+    @staticmethod
+    # define a function that generates the 2 lists necessary for the pointing pairs algorithm (works for all 4 cases)
+    def pointing_pairs_base_list(cell_of_interest: Cell, outside_house: int, inside_house: int) -> (List[int], List[int]):
+        # define 2 temporary lists of candidates to determine if a candidate is a pointing pair
+        _2_shared_houses_candidates_list: List[int] = []
+        _only_outer_house_candidates_list: List[int] = []
+        # iterate over all cells in the outer shared house
+        for test_cell in cell_of_interest.shared_houses[outside_house]:
+            # check if the cell is also in the second shared house
+            if test_cell in cell_of_interest.shared_houses[inside_house]:
+                # if it is, add all the test cell's candidates to the list of candidates in both houses
+                _2_shared_houses_candidates_list.extend(test_cell.candidates)
+            else:
+                # otherwise, add all the test cell's candidates to the list of candidates only in the outer house
+                _only_outer_house_candidates_list.extend(test_cell.candidates)
+        # return both lists for usage
+        return _2_shared_houses_candidates_list, _only_outer_house_candidates_list
+
+    # define the base case of the pointing pairs technique that operates on the 2 lists and can be used for all 4 variations
+    def pointing_pairs_base(self, cell_of_interest: Cell, outside_house: int, inside_house: int):
+        # obtain the necessary lists to find the pointing pairs
+        _both_houses_candidates_list, _single_house_candidates_list = \
+            self.pointing_pairs_base_list(cell_of_interest, outside_house, inside_house)
+        # iterate for all candidates in the cell of interest
+        for candidate in cell_of_interest.candidates:
+            if _both_houses_candidates_list.count(candidate) > 1 and candidate not in _single_house_candidates_list:
+                # call the removal function
+                self.pointing_pairs_removal(cell_of_interest, outside_house, inside_house, candidate)
+
+    @staticmethod
+    # define a function to remove pointing pairs from the cells in the inner house but not the outer house
+    def pointing_pairs_removal(cell_of_interest: Cell, outside_house: int, inside_house: int, candidate: int):
+        # define a temporary lists to help remove the candidate from the correct cells
+        _both_shared_houses_cells_list: List[Cell] = []
+        # TODO - is there a way to abstract out this common list generation between this function and the candidates list generation?
+        # iterate over all cells in the outer shared house
+        for test_cell in cell_of_interest.shared_houses[outside_house]:
+            # check if the cell is also in the second shared house
+            if test_cell in cell_of_interest.shared_houses[inside_house]:
+                # if it is, add the test cell to the list of cells in both houses
+                _both_shared_houses_cells_list.append(test_cell)
+        # iteratively remove the candidate from cells in the inside house not in both houses
+        for test_cell in cell_of_interest.shared_houses[inside_house]:
+            # check if the test cell is in both shared houses
+            if test_cell not in _both_shared_houses_cells_list and candidate in test_cell.candidates:
+                # if the test cell is only in the inside house, remove the candidate from the test cell's candidates list
+                test_cell.candidates.remove(candidate)
+
+    # define a function that maps an iterable with each variation of pointing pair, and executes the algorithm
+    def pointing_pairs_full_cell(self, cell_of_interest: Cell):
+        # iterate for the 4 variations
+        for variation in range(4):
+            # calculate the mapped outside house
+            _outside_house = int((5 / 6) * (variation ** 3) - (7 / 2) * (variation ** 2) + (8 / 3) * variation + 2)
+            # calculate the mapped inside house
+            _inside_house = int((-1 / 6) * (variation ** 3) + (1 / 2) * (variation ** 2) + (2 / 3) * variation)
+            # call the base function for the cell of interest and the mapped outer and inner houses
+            self.pointing_pairs_base(cell_of_interest, _outside_house, _inside_house)
+
+    # define a function that iterates all versions of the pointing pairs technique for all cells
+    def pointing_pairs_full_grid(self):
+        # iterate for all cells in the grid
+        for cell in self.cells:
+            # call the pointing pairs function
+            self.pointing_pairs_full_cell(cell)
 
     # define a function that performs a function for the maximum number of times it reduces the candidates in the grid
     def max_function_iterations(self, functions: List[Callable]):
@@ -363,7 +427,7 @@ class Grid:
             # call the function passed
             functions[0]()
             # tell the user what function was used during the current iteration of solving
-            print('The technique used during this iteration was:', functions[0])
+            print('The technique used during this iteration was:', functions[0], 'Total candidate count is now:', self.candidates_in_grid())
             # print the current solution
             self.solution_print()
             # print the given solution
@@ -414,7 +478,7 @@ game2_solution = "26987143551834927673425698168542719342391586797168352485613274
 
 # game 3 requires naked pairs and pointing pairs to solve
 game3 = "103065000700020000500300000002650030001430600000017205000006050004080060060040010"
-game3_solution = "103065000706120503500370106472650031051432600630017245017296050004581060065743010"
+game3_solution = "123865497746129583589374126472658931951432678638917245817296354394581762265743819"
 
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
@@ -422,7 +486,7 @@ game3_solution = "10306500070612050350037010647265003105143260063001724501729605
 # simple_grid.simple_solve2()
 
 # instantiate the more difficult sudoku
-med_grid = Grid(game2, game2_solution)
+# med_grid = Grid(game2, game2_solution)
 # apply the level 2 algorithm to the game
 # med_grid.lev2_solve()
 # med_grid.general_solver()
@@ -431,5 +495,8 @@ med_grid = Grid(game2, game2_solution)
 hard_grid = Grid(game3, game3_solution)
 # call in general solver
 hard_grid.general_solver()
+hard_grid.solve_techniques[0]()
+hard_grid.solution_print()
+
 
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
