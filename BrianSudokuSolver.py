@@ -546,6 +546,10 @@ game3_solution = "12386549774612958358937412647265893195143267863891724581729635
 game4 = "000009030057408010000000075620500001000000000400000067180000000070200340060900000"
 game4_solution = "216759834957438612843126975628573491795614283431892567184365729579281346362947158"
 
+# game 5 requires more additional techniques
+game5 = "000050007030008020002000309000567000906000402000009000703000900050100060100040000"
+game5_solution = "849352617637918524512674389421567893976831452385429176763285941254193768198746235"
+
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
 # solves the full simple grid
@@ -568,5 +572,10 @@ game4_solution = "21675983495743861284312697562857349179561428343189256718436572
 tough_grid = Grid(game4, game4_solution)
 # call in general solver
 tough_grid.general_solver()
+
+# instantiate the tougher sudoku
+tougher_grid = Grid(game5, game5_solution)
+# call in general solver
+tougher_grid.general_solver()
 
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
