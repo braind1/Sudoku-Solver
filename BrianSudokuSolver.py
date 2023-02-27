@@ -426,8 +426,10 @@ class Grid:
         while _previous_number_candidates > _number_candidates:
             # call the function passed
             functions[0]()
+            # increment the number of iterations performed
+            self.num_iterations += 1
             # tell the user what function was used during the current iteration of solving
-            print('The technique used during this iteration was:', functions[0], 'Total candidate count is now:', self.candidates_in_grid())
+            print(f'The technique used during iteration {self.num_iterations} was:', functions[0], 'Total candidate count is now:', self.candidates_in_grid())
             # print the current solution
             self.solution_print()
             # print the given solution
@@ -435,8 +437,6 @@ class Grid:
             # update the number of candidates for the previous and current iterations
             _previous_number_candidates = _number_candidates
             _number_candidates = self.candidates_in_grid()
-            # increment the number of iterations performed
-            self.num_iterations += 1
         # check if there is only function being passed
         if len(functions) > 1 and _number_candidates > 0:
             # call the recursion with the remaining functions
@@ -455,13 +455,22 @@ class Grid:
 
     # define a function that gives the max function iteration an incrementing list of solving techniques
     def general_solver(self):
-        # iterate for all solving techniques
-        for function_index in range(len(self.solve_techniques)):
-            # give the max function iterations all functions up to the function index
-            self.max_function_iterations(self.solve_techniques[:function_index + 1])
-            # once the sudoku is solved, break out of the loop
-            if self.solve_check():
-                break
+        # create a variable for the current number of candidates in the grid
+        _number_candidates: int = self.candidates_in_grid()
+        # create a variable for the number of candidates in the grid in the previous iteration
+        _previous_number_candidates: int = 729
+        # iterate while the solving technique reduces the number of candidates
+        while _previous_number_candidates > _number_candidates > 0:
+            # iterate for all solving techniques
+            for function_index in range(len(self.solve_techniques)):
+                # give the max function iterations all functions up to the function index
+                self.max_function_iterations(self.solve_techniques[:function_index + 1])
+                # once the sudoku is solved, break out of the loop
+                if self.solve_check():
+                    break
+            # update the number of candidates for the previous and current iterations
+            _previous_number_candidates = _number_candidates
+            _number_candidates = self.candidates_in_grid()
 
     # def simple_solve2(self):
         # self.max_function_iterations(self.solve_techniques[0])
