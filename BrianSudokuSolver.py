@@ -83,7 +83,8 @@ class Grid:
         self.solve_techniques: List[Callable] = [self.single_cand_solve,
                                                  self.full_grid_lone_candidates,
                                                  self.naked_pair_full_grid,
-                                                 self.pointing_pairs_full_grid]
+                                                 self.pointing_pairs_full_grid,
+                                                 self.bi_value_graveyard]
         # create a variable to track the number of times a solving technique was used
         self.num_iterations: int = 0
 
@@ -416,6 +417,58 @@ class Grid:
             # call the pointing pairs function
             self.pointing_pairs_full_cell(cell)
 
+    # define a function that finds the number of unsolved cells in the grid
+    def unsolved_in_grid(self):
+        # initialize the number of unsolved to 0
+        _unsolved_cells_in_grid: int = 0
+        # iterate for all cells in the grid
+        for cell in self.cells:
+            # add all the cells with candidates
+            if len(cell.candidates) > 0:
+                # increase the number of unsolved cells by 1
+                _unsolved_cells_in_grid += 1
+        # return the number of unsolved cells
+        return _unsolved_cells_in_grid
+
+    # define the outer driver for the BUG algorithm
+    def bi_value_graveyard(self):
+        # get the total grid candidates and total unsolved cells
+        _grid_candidates = self.candidates_in_grid()
+        _grid_unsolved = self.unsolved_in_grid()
+        # check the 2 necessary conditions for the algorithm
+        if _grid_candidates % 2 == 1 and _grid_candidates // 2 == _grid_unsolved:
+            # iterate for all cells
+            for cell in self.cells:
+                # only pass the function the cell that has 3 candidates
+                if len(cell.candidates) == 3:
+                    # call the bug finder function with the cell and the shared row (any shared house will work)
+                    # TODO - optimize the house chosen
+                    self.bvg_finder(cell, 0)
+
+    @staticmethod
+    # define the main bi value graveyard finder function
+    def bvg_finder(cell_of_interest: Cell, house: int):
+        # initialize the list of candidates in the shared house
+        _shared_house_candidates: List[int] = []
+        # generate the list of all candidates in the shared house
+        for test_cell in cell_of_interest.shared_houses[house]:
+            # extend the list of shared candidates with test cell's candidates
+            _shared_house_candidates.extend(test_cell.candidates)
+        # create a list of only 1 instance of each candidate in the shared house
+        _shared_house_unique_candidates = list(set(_shared_house_candidates))
+        # initialize the list of candidate counts
+        _candidate_counts: List[int] = []
+        # iteratively check each candidate in the unique candidates list
+        for candidate in _shared_house_unique_candidates:
+            # count the number of times a candidate appears in the shared house
+            _single_candidate_count = _shared_house_candidates.count(candidate)
+            # append the candidate counts list with the count of each candidate
+            _candidate_counts.append(_single_candidate_count)
+        # get the index of the bvg solution from the candidates count list
+        _bvg_solution_index = _candidate_counts.index(3)
+        # set the cell of interest's solution to the solution index in the unique candidates list
+        cell_of_interest.set_solution(_shared_house_unique_candidates[_bvg_solution_index])
+
     # define a function that performs a function for the maximum number of times it reduces the candidates in the grid
     def max_function_iterations(self, functions: List[Callable]):
         # create a variable for the current number of candidates in the grid
@@ -489,6 +542,10 @@ game2_solution = "26987143551834927673425698168542719342391586797168352485613274
 game3 = "103065000700020000500300000002650030001430600000017205000006050004080060060040010"
 game3_solution = "123865497746129583589374126472658931951432678638917245817296354394581762265743819"
 
+# game 4 requires the bi-value graveyard to solve
+game4 = "000009030057408010000000075620500001000000000400000067180000000070200340060900000"
+game4_solution = "216759834957438612843126975628573491795614283431892567184365729579281346362947158"
+
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
 # solves the full simple grid
@@ -501,11 +558,15 @@ game3_solution = "12386549774612958358937412647265893195143267863891724581729635
 # med_grid.general_solver()
 
 # instantiate the hard sudoku
-hard_grid = Grid(game3, game3_solution)
+# hard_grid = Grid(game3, game3_solution)
 # call in general solver
-hard_grid.general_solver()
-hard_grid.solve_techniques[0]()
-hard_grid.solution_print()
+# hard_grid.general_solver()
+# hard_grid.solve_techniques[0]()
+# hard_grid.solution_print()
 
+# instantiate the tough sudoku
+tough_grid = Grid(game4, game4_solution)
+# call in general solver
+tough_grid.general_solver()
 
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
