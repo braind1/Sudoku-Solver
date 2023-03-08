@@ -1,24 +1,14 @@
 from grid import Grid
+from typing import List
 
+# get the game from a text file
+with open('sudoku_game.txt', 'r') as sudoku_file:
+    # create a new variable as a list of the game (element 0) and the solution (element 1)
+    sudoku_game: List[str] = sudoku_file.readlines()
 
-game1 = "004300209005009001070060043006002087190007400050083000600000105003508690042910300"
-game1_solution = "864371259325849761971265843436192587198657432257483916689734125713528694542916378"
+# remove the newline character at the end of each element in the list (left over from readline method)
+sudoku_game = list(map(str.strip, sudoku_game))
 
-# game 2 is harder, cannot be solved using the basic technique
-game2 = "009070035510040206700006001600007093023010000001000500800000049190000058007000600"
-game2_solution = "269871435518349276734256981685427193423915867971683524856132749192764358347598612"
-
-# game 3 requires naked pairs and pointing pairs to solve
-game3 = "103065000700020000500300000002650030001430600000017205000006050004080060060040010"
-game3_solution = "123865497746129583589374126472658931951432678638917245817296354394581762265743819"
-
-# game 4 requires the bi-value graveyard to solve
-game4 = "000009030057408010000000075620500001000000000400000067180000000070200340060900000"
-game4_solution = "216759834957438612843126975628573491795614283431892567184365729579281346362947158"
-
-# game 5 requires more additional techniques (x-wing and y-wing)
-game5 = "000050007030008020002000309000567000906000402000009000703000900050100060100040000"
-game5_solution = "849352617637918524512674389421567893976831452385429176763285941254193768198746235"
 
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
@@ -44,7 +34,7 @@ game5_solution = "84935261763791852451267438942156789397683145238542917676328594
 # tough_grid.general_solver()
 
 # instantiate the tougher sudoku
-tougher_grid = Grid(game5, game5_solution)
+tougher_grid = Grid(sudoku_game[1], sudoku_game[2])
 # call in general solver
 tougher_grid.general_solver()
 

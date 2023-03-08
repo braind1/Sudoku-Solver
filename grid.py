@@ -5,10 +5,6 @@ from cell import Cell
 
 
 class Grid:
-    # get the game from a text file
-    '''with open('sudoku_game.txt', 'r') as sudoku_file:
-        # create a new variable as a list of the game (element 0) and the solution (element 1)
-        sudoku_game: List[str] = sudoku_file.readline()'''
 
     def __init__(self, game, game_solution):
         # create the list of cells
