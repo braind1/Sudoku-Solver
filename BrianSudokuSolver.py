@@ -1,4 +1,5 @@
 from grid import Grid
+from PySide6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
 from typing import List
 
 # get the game from a text file
@@ -9,6 +10,18 @@ with open('sudoku_game.txt', 'r') as sudoku_file:
 # remove the newline character at the end of each element in the list (left over from readline method)
 sudoku_game = list(map(str.strip, sudoku_game))
 
+# create the QApplication to display the sudoku board
+sudoku_app = QApplication([])
+# create the MainWindow
+main_window = QMainWindow()
+# create the main widget
+main_widget = QGraphicsView(main_window)
+# make the main widget the 'central' widget
+main_window.setCentralWidget(main_widget)
+# create the object that contains the graphical components of the sudoku
+main_scene = QGraphicsScene(main_window)
+# tell the widget that the scene exists
+main_widget.setScene(main_scene)
 
 # instantiate the only instance of the grid
 # simple_grid = Grid(game1, game1_solution)
@@ -37,6 +50,14 @@ sudoku_game = list(map(str.strip, sudoku_game))
 tougher_grid = Grid(sudoku_game[1], sudoku_game[2])
 # call in general solver
 tougher_grid.general_solver()
+
+# add the grid to the scene
+main_scene.addItem(tougher_grid)
+
+# show the main window
+main_window.show()
+# execute the app code
+sudoku_app.exec()
 
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
 # if printing each iteration, need to utilize signals and slots

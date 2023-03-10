@@ -1,13 +1,14 @@
 # This file contains the entire Cell class
 
 from typing import List
-from PySide6.QtWidgets import QGraphicsItem
+from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsTextItem
+from PySide6.QtGui import QFont, QFontMetricsF
 
 
-class Cell(QGraphicsItem):
-    def __init__(self, cell_number: int):
+class Cell(QGraphicsRectItem):
+    def __init__(self, parent, cell_number: int):
         # initialize the parent class
-        super().__init__()
+        super().__init__(parent)
         # the x, y position of the cell
         self.position: List[int] = [0, 0]
         # reassigns the position based on the cell number
@@ -33,11 +34,35 @@ class Cell(QGraphicsItem):
         self.shared_block: List[Cell] = []
         # create a list of those shared lists
         self.shared_houses: List[list] = [self.shared_row, self.shared_column, self.shared_block]
+        # create 2 q fonts - 1 for the candidates and 1 for the solutions/givens
+        self.candidate_font: QFont = QFont('Old English Text MT', 8)
+        self.solution_font: QFont = QFont('Old English Text MT', 16)
+        # create a variable for the font metrics
+        self._font_metrics = QFontMetricsF(self.candidate_font)
+        # get the size of the cell
+        self.setRect(0, 0, self._font_metrics.height() * 5, self._font_metrics.height() * 5)
+        # create a list of 9 Q Graphics Text Items to display the candidates
+        self.display_candidates: List[QGraphicsTextItem] = []
+        # call the function to generate the candidate text items
+        self.candidate_text_generate()
 
     # add the string method to print a basic string with all the information about the instance of a cell
     def __str__(self):
         # add all the attributes of the cell to the string
         return f'p:{self.position}g:{self.given}c:{self.candidates}s:{self.solution}b:{self.block}'
+
+    # define a function to generate candidate text items
+    def candidate_text_generate(self):
+        # iterate for all 9 candidates
+        for candidate in range(1, 10):
+            # create the current text item with the string of the candidate, and its parent
+            _candidate_text_item = QGraphicsTextItem(str(candidate), self)
+            # set the font of the text item to have all the attributes of a candidate text item
+            _candidate_text_item.setFont(self.candidate_font)
+            # map number of the candidate to its position in the cell rectangle item
+            _candidate_text_item.setPos(((candidate - 1) % 3) + ((candidate - 1) % 3) * (3 * self._font_metrics.height() / 2) + (1 / 4) * self._font_metrics.height(), ((candidate - 1) // 3) + ((candidate - 1) // 3) * (3 * self._font_metrics.height() / 2) + (1 / 4) * self._font_metrics.height())
+            # add the current text item to the list of candidate text items
+            self.display_candidates.append(_candidate_text_item)
 
     @staticmethod
     # create a function that takes one of the positions and simplifies it

@@ -1,12 +1,14 @@
 # This file contains the entire grid class
-
+from PySide6.QtWidgets import QGraphicsRectItem
 from typing import Callable, List
 from cell import Cell
 
 
-class Grid:
+class Grid(QGraphicsRectItem):
 
     def __init__(self, game, game_solution):
+        # initialize the parent class
+        super().__init__()
         # create the list of cells
         self.cells: List[Cell] = []
         # create all 81 instances of cell, then add them to the list of cells
@@ -27,16 +29,22 @@ class Grid:
     def cell_generate(self, game: str):
         # iterate for all 81 cells
         for cells in range(len(game)):
+            # create a temporary variable to represent the current cell being instantiated
+            _current_cell: Cell = Cell(self, cells)
             # append the list with an instance of the Cell class
-            self.cells.append(Cell(cells))
+            self.cells.append(_current_cell)
+            # position the cell in the grid
+            _current_cell.setPos((_current_cell.position[1] - 1) * _current_cell.rect().width(), (_current_cell.position[0] - 1) * _current_cell.rect().height())
             # set the given attribute to the corresponding digit in the given problem
-            self.cells[cells].given = int(game[cells])
+            _current_cell.given = int(game[cells])
             # if the given isn't 0, the cell should have no candidates
-            if self.cells[cells].given != 0:
+            if _current_cell.given != 0:
                 # set the candidates list to an empty list
-                self.cells[cells].candidates.clear()
+                _current_cell.candidates.clear()
                 # set the solution for the cell to the given
-                self.cells[cells].solution = self.cells[cells].given
+                _current_cell.solution = _current_cell.given
+        # determine the size of the grid based on the height and width of the cells
+        self.setRect(0, 0, self.cells[0].rect().width() * 9, self.cells[0].rect().height() * 9)
 
     # define a function that populates the shared house lists immediately after cell generation
     def cell_shared_house_generate(self):
