@@ -2,7 +2,8 @@
 
 from typing import List
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsTextItem
-from PySide6.QtGui import QFont, QFontMetricsF
+from PySide6.QtGui import QFont, QFontMetricsF, QPen
+from PySide6 import QtCore, QtGui
 
 
 class Cell(QGraphicsRectItem):
@@ -37,6 +38,12 @@ class Cell(QGraphicsRectItem):
         # create 2 q fonts - 1 for the candidates and 1 for the solutions/givens
         self.candidate_font: QFont = QFont('Old English Text MT', 8)
         self.solution_font: QFont = QFont('Old English Text MT', 16)
+        # set the default pen
+        self.default_pen: [QPen] = QtGui.QPen
+        # create 3 q pens - 1 for the givens, 1 for the solutions, and 1 for the border
+        self.given_pen: QPen = QtGui.QPen(QtCore.Qt.GlobalColor.darkCyan)
+        self.solution_pen: QPen = QtGui.QPen(QtCore.Qt.GlobalColor.green)
+        self.line_pen: QPen = QtGui.QPen(QtCore.Qt.GlobalColor.darkYellow)
         # create a variable for the font metrics
         self._font_metrics = QFontMetricsF(self.candidate_font)
         # get the size of the cell
@@ -56,11 +63,15 @@ class Cell(QGraphicsRectItem):
         # iterate for all 9 candidates
         for candidate in range(1, 10):
             # create the current text item with the string of the candidate, and its parent
-            _candidate_text_item = QGraphicsTextItem(str(candidate), self)
+            _candidate_text_item: QGraphicsTextItem = QGraphicsTextItem(str(candidate), self)
             # set the font of the text item to have all the attributes of a candidate text item
             _candidate_text_item.setFont(self.candidate_font)
             # map number of the candidate to its position in the cell rectangle item
-            _candidate_text_item.setPos(((candidate - 1) % 3) + ((candidate - 1) % 3) * (3 * self._font_metrics.height() / 2) + (1 / 4) * self._font_metrics.height(), ((candidate - 1) // 3) + ((candidate - 1) // 3) * (3 * self._font_metrics.height() / 2) + (1 / 4) * self._font_metrics.height())
+            _candidate_text_item.setPos(
+                ((candidate - 1) % 3) + ((candidate - 1) % 3) * (3 * self._font_metrics.height() / 2) +
+                (1 / 4) * self._font_metrics.height(),
+                ((candidate - 1) // 3) + ((candidate - 1) // 3) * (3 * self._font_metrics.height() / 2) +
+                (1 / 4) * self._font_metrics.height())
             # add the current text item to the list of candidate text items
             self.display_candidates.append(_candidate_text_item)
 
@@ -85,11 +96,8 @@ class Cell(QGraphicsRectItem):
             _aisle_belt = self.coord_simplify(self.position[d])
             # add the belt variable to the belt list
             self._aisle_belt_list.append(int(_aisle_belt))
-        # print(f'{self._aisle_belt_list}')
-
         # maps the belt and aisle number to the correct block
         self.block = 3 * self._aisle_belt_list[1] + self._aisle_belt_list[0] - 3
-        # print(f'{self.block}')
 
     # define a function to set a solution and clear the candidates afterwards
     def set_solution(self, solution: int):
@@ -97,3 +105,41 @@ class Cell(QGraphicsRectItem):
         self.solution = solution
         # clear the candidates list
         self.candidates.clear()
+        self.paint_text_item(solution, self.solution_pen)
+        # create the solution text item
+        # _solution_text_item: QGraphicsTextItem = QGraphicsTextItem(str(solution), self)
+        # set the font of the solution text item
+        # _solution_text_item.setFont(self.solution_font)
+        # choose the correct pen to paint the solution
+        # self.setPen(self.solution_pen)
+        # position the solution in the cell
+        # _solution_text_item.setPos(1.5 * self._font_metrics.height(), 1.5 * self._font_metrics.height())
+        # hide the candidates of that cell
+        # map(QGraphicsTextItem.hide, self.display_candidates)
+
+    # define a function that paints the given of a cell
+    def paint_given(self, given: int):
+        self.paint_text_item(given, self.given_pen)
+        # create the given text item
+        # _given_text_item: QGraphicsTextItem = QGraphicsTextItem(str(given), self)
+        # set the font of the given text item
+        # _given_text_item.setFont(self.solution_font)
+        # choose the correct pen to paint the given
+        # self.setPen(self.given_pen)
+        # position the given in the cell
+        # _given_text_item.setPos(1.5 * self._font_metrics.height(), 1.5 * self._font_metrics.height())
+        # hide the candidates of that cell
+        # map(QGraphicsTextItem.hide, self.display_candidates)
+
+    # define a function that paints a given or a solution
+    def paint_text_item(self, sol_or_given: int, pen: QPen):
+        # create the arbitrary text item
+        _text_item: QGraphicsTextItem = QGraphicsTextItem(str(sol_or_given), self)
+        # set the font of the text item
+        _text_item.setFont(self.solution_font)
+        # choose the correct pen to pain with
+        self.setPen(pen)
+        # position the text item in the cell
+        _text_item.setPos(1.5 * self._font_metrics.height(), 1.5 * self._font_metrics.height())
+        # hide the candidates of the cell
+        map(QGraphicsTextItem.hide, self.display_candidates)
