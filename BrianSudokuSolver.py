@@ -60,12 +60,3 @@ main_window.show()
 sudoku_app.exec()
 
 # TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
-# if printing each iteration, need to utilize signals and slots
-# every time a solving algorithm is called, produce a signal
-# the grid will need to be/have? a slot that is connected to the signal that the solver produces
-# when the signal is received, update the grid with the current solution
-# might look something like self.printed_grid.connect(self.current_solution_print) to connect the signal and slot
-# once the grid is defined, can use the layout function to format the grid in the output window
-# remember once we have an instance of the printed grid, to use printed_grid.show() and grid.exec() to actually execute and display the grid
-# table printing seems like a reasonable and somewhat simple option for printing the grid
-# cell will be derived from QGrpahicsObject so that it inherits painting methods
