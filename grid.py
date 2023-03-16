@@ -3,11 +3,13 @@ from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsLineItem
 from typing import Callable, List
 from cell import Cell
 from PySide6 import QtGui, QtCore
+from PySide6.QtCore import QObject, Qt
+from PySide6.QtGui import QGuiApplication, QCursor
 
 
-class Grid(QGraphicsRectItem):
+class Grid(QGraphicsRectItem, QObject):
     def __init__(self, game, game_solution):
-        # initialize the parent class
+        # initialize the parent classes
         super().__init__()
         # create the list of cells
         self.cells: List[Cell] = []
@@ -464,6 +466,19 @@ class Grid(QGraphicsRectItem):
         # return the total count
         return _total_grid_candidates
 
+    @staticmethod
+    # create a decorator function to make the waiting cursor
+    def waiting_cursor(function: Callable):
+        def inner(self):
+            # set the cursor to the waiting cursor
+            QGuiApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+            # call the function
+            function(self)
+            # reset the cursor to the normal cursor
+            QGuiApplication.restoreOverrideCursor()
+        return inner
+
+    @waiting_cursor
     # define a function that gives the max function iteration an incrementing list of solving techniques
     def general_solver(self):
         # create a variable for the current number of candidates in the grid
@@ -482,3 +497,7 @@ class Grid(QGraphicsRectItem):
             # update the number of candidates for the previous and current iterations
             _previous_number_candidates = _number_candidates
             _number_candidates = self.candidates_in_grid()
+
+    @QtCore.Slot()
+    def on_next_button_clicked(self):
+        self.general_solver()

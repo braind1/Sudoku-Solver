@@ -140,7 +140,6 @@ class Cell(QGraphicsRectItem):
         # position the text item in the cell
         self.temp_text_item.setPos((self.rect().width() / 2) - (self.temp_text_item.boundingRect().width() / 2),
                                    (self.rect().height() / 2) - (self.temp_text_item.boundingRect().height() / 2))
-        print(self, self.temp_text_item.pos())
         # show the newly created text item
         self.temp_text_item.show()
         # hide the candidates of the cell
