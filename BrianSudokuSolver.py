@@ -14,6 +14,10 @@ sudoku_game = list(map(str.strip, sudoku_game))
 sudoku_app = QApplication([])
 # create the MainWindow
 main_window = QMainWindow()
+# resize the window to display large enough for the grid upon launch
+main_window.resize(700, 700)
+# rename the window
+main_window.setWindowTitle('Sudoku Game')
 # create the main widget
 main_widget = QGraphicsView(main_window)
 # make the main widget the 'central' widget

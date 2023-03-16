@@ -1,16 +1,18 @@
 # This file contains the entire grid class
-from PySide6.QtWidgets import QGraphicsRectItem
+from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsLineItem
 from typing import Callable, List
 from cell import Cell
+from PySide6 import QtGui, QtCore
 
 
 class Grid(QGraphicsRectItem):
-
     def __init__(self, game, game_solution):
         # initialize the parent class
         super().__init__()
         # create the list of cells
         self.cells: List[Cell] = []
+        # create a new QPen for the extra thick borderlines
+        self.thick_line_pen: QtGui.QPen = QtGui.QPen(QtCore.Qt.GlobalColor.darkYellow, 3)
         # create all 81 instances of cell, then add them to the list of cells
         self.cell_generate(game)
         # create the solution as an attribute to check against later
@@ -25,6 +27,33 @@ class Grid(QGraphicsRectItem):
                                                  self.bi_value_graveyard]
         # create a variable to track the number of times a solving technique was used
         self.num_iterations: int = 0
+        # create a list of line items for the lines in between cells
+        self.thick_lines: List[QGraphicsLineItem] = []
+        # call the thick line generation method
+        self.thick_line_generate()
+
+    # generate the 4 thick lines in the grid
+    def thick_line_generate(self):
+        thick_line_1: QGraphicsLineItem = QGraphicsLineItem(self)
+        thick_line_1.setPen(self.thick_line_pen)
+        thick_line_1.setLine(0, 3 * self.cells[0].rect().height(), 9 * self.cells[0].rect().width(),
+                             3 * self.cells[0].rect().height())
+        self.thick_lines.append(thick_line_1)
+        thick_line_2: QGraphicsLineItem = QGraphicsLineItem(self)
+        thick_line_2.setPen(self.thick_line_pen)
+        thick_line_2.setLine(0, 6 * self.cells[0].rect().height(), 9 * self.cells[0].rect().width(),
+                             6 * self.cells[0].rect().height())
+        self.thick_lines.append(thick_line_2)
+        thick_line_3: QGraphicsLineItem = QGraphicsLineItem(self)
+        thick_line_3.setPen(self.thick_line_pen)
+        thick_line_3.setLine(3 * self.cells[0].rect().width(), 0, 3 * self.cells[0].rect().width(),
+                             9 * self.cells[0].rect().height())
+        self.thick_lines.append(thick_line_3)
+        thick_line_4: QGraphicsLineItem = QGraphicsLineItem(self)
+        thick_line_4.setPen(self.thick_line_pen)
+        thick_line_4.setLine(6 * self.cells[0].rect().width(), 0, 6 * self.cells[0].rect().width(),
+                             9 * self.cells[0].rect().height())
+        self.thick_lines.append(thick_line_4)
 
     def cell_generate(self, game: str):
         # iterate for all 81 cells
@@ -34,17 +63,14 @@ class Grid(QGraphicsRectItem):
             # append the list with an instance of the Cell class
             self.cells.append(_current_cell)
             # position the cell in the grid
-            _current_cell.setPos((_current_cell.position[1] - 1) * _current_cell.rect().width(), (_current_cell.position[0] - 1) * _current_cell.rect().height())
+            _current_cell.setPos((_current_cell.position[Cell.COL] - 1) * _current_cell.rect().width(),
+                                 (_current_cell.position[Cell.ROW] - 1) * _current_cell.rect().height())
             # set the given attribute to the corresponding digit in the given problem
-            _current_cell.given = int(game[cells])
-            # if the given isn't 0, the cell should have no candidates
-            if _current_cell.given != 0:
-                # set the candidates list to an empty list
-                _current_cell.candidates.clear()
-                # set the solution for the cell to the given
-                _current_cell.solution = _current_cell.given
+            _current_cell.set_given(int(game[cells]))
         # determine the size of the grid based on the height and width of the cells
         self.setRect(0, 0, self.cells[0].rect().width() * 9, self.cells[0].rect().height() * 9)
+        # draw the grid with the thick pen
+        self.setPen(self.thick_line_pen)
 
     # define a function that populates the shared house lists immediately after cell generation
     def cell_shared_house_generate(self):
@@ -59,18 +85,18 @@ class Grid(QGraphicsRectItem):
         # executes if the given is currently in the candidates list, ie given != 0
         if test_cell.given in cell_of_interest.candidates:
             # removes the given of b from the candidates list of a
-            cell_of_interest.candidates.remove(test_cell.given)
+            cell_of_interest.candidate_remove(test_cell.given)
 
         # executes if cell b has a solution, and it is in the candidates list
         if test_cell.solution in cell_of_interest.candidates:
             # removes the solution of b from the candidates list of a
-            cell_of_interest.candidates.remove(test_cell.solution)
+            cell_of_interest.candidate_remove(test_cell.solution)
 
     @staticmethod
     # create a function that can reference the single attribute (attr) of a list given any instance of the class (cell instance)
     def attribute_test(cell_instance: Cell, attr: int) -> int:
         # create a list of the cell attributes to test corresponding to the row, column, and block
-        _attribute_test_list = [cell_instance.position[1], cell_instance.position[0], cell_instance.block]
+        _attribute_test_list = [cell_instance.position[Cell.ROW], cell_instance.position[Cell.COL], cell_instance.block]
         # returns the single attribute element that was passed
         return _attribute_test_list[attr]
 
@@ -202,6 +228,8 @@ class Grid(QGraphicsRectItem):
             if candidate not in _temp_house_candidates:
                 # if the candidate is not found elsewhere in the house, the candidate is the solution to the cell of interest
                 cell_of_interest.set_solution(candidate)
+                # if a solution is set, break out of the iterations
+                break
 
     # define a function that calls the potential lone candidate search for all attributes in the house
     def full_cell_lone_candidate_search(self, cell_of_interest: Cell):
@@ -322,7 +350,7 @@ class Grid(QGraphicsRectItem):
             # check if the test cell is in both shared houses
             if test_cell not in _both_shared_houses_cells_list and candidate in test_cell.candidates:
                 # if the test cell is only in the inside house, remove the candidate from the test cell's candidates list
-                test_cell.candidates.remove(candidate)
+                test_cell.candidate_remove(candidate)
 
     # define a function that maps an iterable with each variation of pointing pair, and executes the algorithm
     def pointing_pairs_full_cell(self, cell_of_interest: Cell):

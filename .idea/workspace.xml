@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Created a QApplication and began adding the grid">
+    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Minor updates">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BrianSudokuSolver.py" beforeDir="false" afterPath="$PROJECT_DIR$/BrianSudokuSolver.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cell.py" beforeDir="false" afterPath="$PROJECT_DIR$/cell.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/grid.py" afterDir="false" />
     </list>
+    <list id="d549c352-3635-4a45-ac92-76798cb6742e" name="Changes by mdurland" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,7 +58,7 @@
       <option name="presentableId" value="Default" />
       <updated>1675908304348</updated>
       <workItem from="1675908305823" duration="66988000" />
-      <workItem from="1677166801869" duration="68373000" />
+      <workItem from="1677166801869" duration="79145000" />
     </task>
     <task id="LOCAL-00001" summary="Added support for naked trios through naked pair algorithm">
       <created>1677177843328</created>
@@ -142,7 +144,21 @@
       <option name="project" value="LOCAL" />
       <updated>1678414699617</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Attempted to paint the givens and solutions (needs work)">
+      <created>1678422866197</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1678422866197</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Minor updates">
+      <created>1678422888843</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1678422888843</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -172,11 +188,24 @@
     <MESSAGE value="Put Cell and Grid in their own files" />
     <MESSAGE value="Debugged the file IO" />
     <MESSAGE value="Created a QApplication and began adding the grid" />
-    <option name="LAST_COMMIT_MESSAGE" value="Created a QApplication and began adding the grid" />
+    <MESSAGE value="Attempted to paint the givens and solutions (needs work)" />
+    <MESSAGE value="Minor updates" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor updates" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/cell.py</url>
+          <line>132</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CSCI101_2$grid.coverage" NAME="grid Coverage Results" MODIFIED="1678406643824" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/CSCI101_2$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1678422524510" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/CSCI101_2$cell.coverage" NAME="cell Coverage Results" MODIFIED="1678408020603" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CSCI101_2$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1679005954796" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CSCI101_2$cell.coverage" NAME="cell Coverage Results" MODIFIED="1678831643244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
