@@ -1,6 +1,6 @@
 # This file contains the entire grid class
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsLineItem
-from typing import Callable, List
+from typing import Any, Callable, List
 from cell import Cell
 from PySide6 import QtGui, QtCore
 from PySide6.QtCore import QObject, Qt
@@ -271,7 +271,6 @@ class Grid(QGraphicsRectItem, QObject):
         # TODO - does the logic work for the 3 candidate version?
         if len(cell_of_interest.candidates) == 2 and cell_of_interest.candidates in _temp_shared_house_candidates:
             # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
-            # TODO - does this function make sense and work correctly?
             self.naked_pair_candidate_removal(cell_of_interest, attr)
         elif len(cell_of_interest.candidates) == 3 and _temp_shared_house_candidates.count(
                 cell_of_interest.candidates) == 2:
@@ -427,6 +426,69 @@ class Grid(QGraphicsRectItem, QObject):
         _bvg_solution_index = _candidate_counts.index(3)
         # set the cell of interest's solution to the solution index in the unique candidates list
         cell_of_interest.set_solution(_shared_house_unique_candidates[_bvg_solution_index])
+
+    # define a function that returns a list of all cells and their candidates in a shared house
+    def shared_house_cand_getter(self, house: int, position_of_interest: int) -> List[Any]:
+        # initialize a list of lists containing cells and their candidates that will all be in a shared house
+        _candidates_in_house: List[list] = []
+        # iterate through all cells in the grid
+        for cell in self.cells:
+            # check if the cell's house position (row or column) is the position of interest (1 - 9)
+            if cell.position[house] == position_of_interest:
+                # create a list that will have the cell and its candidates
+                _position_and_candidates: List[Any] = [cell]
+                # extend the candidates of the cell to the list of the cell and its candidates
+                _position_and_candidates.extend(cell.candidates)
+                # add the cell and its candidates as a single list to the list of all cells in the shared house
+                _candidates_in_house.append(_position_and_candidates)
+        # return the list of cells and their candidates
+        return _candidates_in_house
+
+    # define a function that finds the first 2 cells in an x-wing
+    def single_house_x_wing(self, house: int, position_of_interest: int) -> tuple[int, int, int, int] or None:
+        _cells_and_candidates_in_house: List[Any] = self.shared_house_cand_getter(house, position_of_interest)
+        # look through all potential candidates to find a candidate that only appears twice in a column
+        for candidate in range(1, 10):
+            # initialize an empty list to contain the cell numbers of all cells containing the candidate of interest
+            _cells_with_candidates: List[Cell] = []
+            # iterate through all lists in the candidates in column list
+            for list_of_interest in _cells_and_candidates_in_house:
+                # check if the candidate is in the current list
+                if candidate in list_of_interest:
+                    # if the candidate is in the list, append the list of cells containing the candidate with the cell's position
+                    _cells_with_candidates.append(list_of_interest[0])
+            # check how many cells contain the candidate
+            if len(_cells_with_candidates) == 2:
+                # if there are only 2 cells, return the candidate and the row or column (inverse of given house) of the 2 cells
+                return candidate, _cells_with_candidates[0].position[1 - house], _cells_with_candidates[1].position[1 - house], position_of_interest
+        # if no candidates appear only twice, return nothing
+        return None
+
+    # define a function to remove candidates after x-wings have been found
+    def x_wing_remove(self, house: int, position: int):
+        # get the candidate and 2 row or column numbers from the x wing
+        candidate, first_house, second_house = self.single_house_x_wing(house, position)[0:2]
+        # TODO: finish this function
+
+    # define a recursive function to compare 2 rows or columns to find x-wing pairs
+    def x_wing_compare(self, house: int, starting_index: int):
+        # iterate through all the rows below or columns right of the current row or column
+        for position in range(starting_index + 1, 10):
+            # check if the candidate and both rows or columns match
+            if self.single_house_x_wing(house, starting_index)[0:2] == self.single_house_x_wing(house, position)[0:2]:
+                # TODO: removal function for the candidate
+                break
+        # recurse while there is still at least two more rows or columns to compare
+        while starting_index < 8:
+            # call the function with the same house, but an incremented starting index
+            self.x_wing_compare(house, starting_index + 1)
+
+    # define the full x wing technique
+    def x_wing(self):
+        # iterate through the shared houses (column then row)
+        for house in range(2):
+            # call the comparison function
+            self.x_wing_compare(house, 1)
 
     # define a function that performs a function for the maximum number of times it reduces the candidates in the grid
     def max_function_iterations(self, functions: List[Callable]):

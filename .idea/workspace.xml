@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Finished the QApplication display for the grid">
+    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Added a button that triggers general solver">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BrianSudokuSolver.py" beforeDir="false" afterPath="$PROJECT_DIR$/BrianSudokuSolver.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cell.py" beforeDir="false" afterPath="$PROJECT_DIR$/cell.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/grid.py" afterDir="false" />
     </list>
-    <list id="d549c352-3635-4a45-ac92-76798cb6742e" name="Changes by mdurland" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,7 +55,7 @@
       <option name="presentableId" value="Default" />
       <updated>1675908304348</updated>
       <workItem from="1675908305823" duration="66988000" />
-      <workItem from="1677166801869" duration="83206000" />
+      <workItem from="1677166801869" duration="91074000" />
     </task>
     <task id="LOCAL-00001" summary="Added support for naked trios through naked pair algorithm">
       <created>1677177843328</created>
@@ -165,7 +162,14 @@
       <option name="project" value="LOCAL" />
       <updated>1679006294976</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Added a button that triggers general solver">
+      <created>1679010523567</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1679010523567</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -198,7 +202,8 @@
     <MESSAGE value="Attempted to paint the givens and solutions (needs work)" />
     <MESSAGE value="Minor updates" />
     <MESSAGE value="Finished the QApplication display for the grid" />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished the QApplication display for the grid" />
+    <MESSAGE value="Added a button that triggers general solver" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added a button that triggers general solver" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
