@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Added a button that triggers general solver">
+    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Started working on the x-wing technique">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/grid.py" afterDir="false" />
     </list>
@@ -55,7 +55,7 @@
       <option name="presentableId" value="Default" />
       <updated>1675908304348</updated>
       <workItem from="1675908305823" duration="66988000" />
-      <workItem from="1677166801869" duration="91074000" />
+      <workItem from="1677166801869" duration="92913000" />
     </task>
     <task id="LOCAL-00001" summary="Added support for naked trios through naked pair algorithm">
       <created>1677177843328</created>
@@ -169,7 +169,14 @@
       <option name="project" value="LOCAL" />
       <updated>1679010523567</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Started working on the x-wing technique">
+      <created>1679199315883</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1679199315883</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -203,7 +210,8 @@
     <MESSAGE value="Minor updates" />
     <MESSAGE value="Finished the QApplication display for the grid" />
     <MESSAGE value="Added a button that triggers general solver" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added a button that triggers general solver" />
+    <MESSAGE value="Started working on the x-wing technique" />
+    <option name="LAST_COMMIT_MESSAGE" value="Started working on the x-wing technique" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -218,7 +226,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CSCI101_2$grid.coverage" NAME="grid Coverage Results" MODIFIED="1678406643824" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/CSCI101_2$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1679010392657" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CSCI101_2$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1679243071738" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CSCI101_2$cell.coverage" NAME="cell Coverage Results" MODIFIED="1678831643244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
