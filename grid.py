@@ -468,30 +468,28 @@ class Grid(QGraphicsRectItem, QObject):
     # define a function to remove candidates after x-wings have been found
     def x_wing_remove(self, house: int, first_position: int, second_position: int):
         # get the candidate and 2 row or column numbers from the x wing
-        candidate, first_house, second_house = self.single_house_x_wing(house, first_position)[0:2]
+        candidate, first_house, second_house = self.single_house_x_wing(house, first_position)[0:3]
         # iterate through all cells
         for cell in self.cells:
             # check if the cell is in the same house outputted by the house function but not in the same house given
             if cell.position[1 - house] == (first_house or second_house) and cell.position[house] != (first_position or second_position):
-                # remove the candidate from the cell
-                cell.candidates.remove(candidate)
-                # hide the displayed candidate text item
-                cell.display_candidates[candidate - 1].hide()
+                # remove the candidate from the cell and grid graphic
+                cell.candidate_remove(candidate)
 
     # define a recursive function to compare 2 rows or columns to find x-wing pairs
     def x_wing_compare(self, house: int, starting_index: int):
         # iterate through all the rows below or columns right of the current row or column
         for position in range(starting_index + 1, 10):
             # check if the candidate and both rows or columns match and have x-wing candidates
-            if self.single_house_x_wing(house, starting_index) is None:
+            if self.single_house_x_wing(house, starting_index) is None or self.single_house_x_wing(house, position) is None:
                 continue
             # TODO: debug line 489 - type error 'None' is not subscriptable
-            elif self.single_house_x_wing(house, starting_index)[0:2] == self.single_house_x_wing(house, position)[0:2]:
+            elif self.single_house_x_wing(house, starting_index)[0:3] == self.single_house_x_wing(house, position)[0:3]:
                 # call the removal function
                 self.x_wing_remove(house, starting_index, position)
                 break
         # recurse while there is still at least two more rows or columns to compare
-        while starting_index < 8:
+        if starting_index < 8:
             # call the function with the same house, but an incremented starting index
             self.x_wing_compare(house, starting_index + 1)
 

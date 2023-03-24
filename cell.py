@@ -147,7 +147,8 @@ class Cell(QGraphicsRectItem):
 
     # define a method to remove candidates from the instance of the cell and hide the corresponding candidate text item
     def candidate_remove(self, candidate: int):
-        # remove the candidate from the instance of the cell
-        self.candidates.remove(candidate)
-        # hide the corresponding text item
-        self.display_candidates[candidate - 1].hide()
+        if candidate in self.candidates:
+            # remove the candidate from the instance of the cell
+            self.candidates.remove(candidate)
+            # hide the corresponding text item
+            self.display_candidates[candidate - 1].hide()
