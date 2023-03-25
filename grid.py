@@ -22,12 +22,14 @@ class Grid(QGraphicsRectItem, QObject):
         # populate the lists of shared houses for each cell
         self.cell_shared_house_generate()
         # create a list of the solving techniques the grid has
-        self.solve_techniques: List[Callable] = [self.single_cand_solve,
-                                                 self.full_grid_lone_candidates,
-                                                 self.naked_pair_full_grid,
-                                                 self.pointing_pairs_full_grid,
-                                                 self.bi_value_graveyard,
-                                                 self.x_wing]
+        self.solve_techniques: List[Callable] = [
+            self.single_cand_solve,
+            self.full_grid_lone_candidates,
+            self.naked_pair_full_grid,
+            self.pointing_pairs_full_grid,
+            self.bi_value_graveyard,
+            self.x_wing
+        ]
         # create a variable to track the number of times a solving technique was used
         self.num_iterations: int = 0
         # create a list of line items for the lines in between cells
@@ -445,11 +447,12 @@ class Grid(QGraphicsRectItem, QObject):
         # return the list of cells and their candidates
         return _candidates_in_house
 
+    # TODO: this function needs to be iterable such that if the first candidate found only twice isn't an x-wing, the rest of the candidates are checked
     # define a function that finds the first 2 cells in an x-wing
-    def single_house_x_wing(self, house: int, position_of_interest: int) -> tuple[int, int, int, int] or None:
+    def single_house_x_wing(self, house: int, position_of_interest: int, starting_candidate: int) -> tuple[int, int, int, int] or None:
         _cells_and_candidates_in_house: List[Any] = self.shared_house_cand_getter(house, position_of_interest)
         # look through all potential candidates to find a candidate that only appears twice in a column
-        for candidate in range(1, 10):
+        for candidate in range(starting_candidate, 10):
             # initialize an empty list to contain the cell numbers of all cells containing the candidate of interest
             _cells_with_candidates: List[Cell] = []
             # iterate through all lists in the candidates in column list
@@ -461,7 +464,8 @@ class Grid(QGraphicsRectItem, QObject):
             # check how many cells contain the candidate
             if len(_cells_with_candidates) == 2:
                 # if there are only 2 cells, return the candidate and the row or column (inverse of given house) of the 2 cells
-                return candidate, _cells_with_candidates[0].position[1 - house], _cells_with_candidates[1].position[1 - house], position_of_interest
+                return candidate, _cells_with_candidates[0].position[1 - house],\
+                    _cells_with_candidates[1].position[1 - house], position_of_interest
         # if no candidates appear only twice, return nothing
         return None
 
@@ -472,7 +476,8 @@ class Grid(QGraphicsRectItem, QObject):
         # iterate through all cells
         for cell in self.cells:
             # check if the cell is in the same house outputted by the house function but not in the same house given
-            if cell.position[1 - house] == (first_house or second_house) and cell.position[house] != (first_position or second_position):
+            if cell.position[1 - house] == (first_house or second_house) and cell.position[house] != (
+                    first_position or second_position):
                 # remove the candidate from the cell and grid graphic
                 cell.candidate_remove(candidate)
 
@@ -481,13 +486,25 @@ class Grid(QGraphicsRectItem, QObject):
         # iterate through all the rows below or columns right of the current row or column
         for position in range(starting_index + 1, 10):
             # check if the candidate and both rows or columns match and have x-wing candidates
-            if self.single_house_x_wing(house, starting_index) is None or self.single_house_x_wing(house, position) is None:
+            _starting_x_wing_check = self.single_house_x_wing(house, starting_index, 1)
+            _iterative_position_x_wing_check = self.single_house_x_wing(house, position, 1)
+            # check if no candidates appear twice in either house searched
+            if _starting_x_wing_check is None\
+                    or _iterative_position_x_wing_check is None:
+                # if no candidate was returned, do nothing
                 continue
-            # TODO: debug line 489 - type error 'None' is not subscriptable
-            elif self.single_house_x_wing(house, starting_index)[0:3] == self.single_house_x_wing(house, position)[0:3]:
-                # call the removal function
+            # otherwise, check if the candidate and 2 houses found match
+            elif _starting_x_wing_check[0:3] == _iterative_position_x_wing_check[0:3]:
+                # if they match, call the removal function
                 self.x_wing_remove(house, starting_index, position)
                 break
+            # if candidates were found but didn't match, continue searching through the position's candidates
+            else:
+                # start the search at the next candidate after the one previously found
+                _iterative_position_x_wing_check = self.single_house_x_wing(house, position, _iterative_position_x_wing_check[0] + 1)
+                # TODO: go through the same checks as earlier - abstract that code out?
+        # TODO: before recursing, need to check other candidates in the position's house to see if they only exist twice
+        # TODO: after iterating through the candidates in the position's house, iterate through starting index's candidates
         # recurse while there is still at least two more rows or columns to compare
         if starting_index < 8:
             # call the function with the same house, but an incremented starting index
@@ -548,6 +565,7 @@ class Grid(QGraphicsRectItem, QObject):
             function(self)
             # reset the cursor to the normal cursor
             QGuiApplication.restoreOverrideCursor()
+
         return inner
 
     @waiting_cursor
