@@ -91,7 +91,6 @@ class Grid(QGraphicsRectItem, QObject):
         if test_cell.given in cell_of_interest.candidates:
             # removes the given of b from the candidates list of a
             cell_of_interest.candidate_remove(test_cell.given)
-
         # executes if cell b has a solution, and it is in the candidates list
         if test_cell.solution in cell_of_interest.candidates:
             # removes the solution of b from the candidates list of a
@@ -275,8 +274,8 @@ class Grid(QGraphicsRectItem, QObject):
         if len(cell_of_interest.candidates) == 2 and cell_of_interest.candidates in _temp_shared_house_candidates:
             # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
             self.naked_pair_candidate_removal(cell_of_interest, attr)
-        elif len(cell_of_interest.candidates) == 3 and _temp_shared_house_candidates.count(
-                cell_of_interest.candidates) == 2:
+        elif len(cell_of_interest.candidates) == 3\
+                and _temp_shared_house_candidates.count(cell_of_interest.candidates) == 2:
             # removes the candidates from all cells containing those candidates except the 2 other cells with the same candidates lists
             self.naked_pair_candidate_removal(cell_of_interest, attr)
 
@@ -310,8 +309,7 @@ class Grid(QGraphicsRectItem, QObject):
     # define a function that generates the 2 lists necessary for the pointing pairs algorithm (works for all 4 cases)
     # the outer and inner house ints are the indexes of the shared attribute in the cell's shared house list
     # the return lists contain the all the candidates in both houses, and the candidates in the outer but not the inner house
-    def pointing_pairs_base_list(cell_of_interest: Cell, outside_house: int, inside_house: int) -> (
-            List[int], List[int]):
+    def pointing_pairs_base_list(cell_of_interest: Cell, outside_house: int, inside_house: int) -> (List[int], List[int]):
         # define 2 temporary lists of candidates to determine if a candidate is a pointing pair
         _2_shared_houses_candidates_list: List[int] = []
         _only_outer_house_candidates_list: List[int] = []
@@ -469,42 +467,48 @@ class Grid(QGraphicsRectItem, QObject):
         # if no candidates appear only twice, return nothing
         return None
 
+    # define a function that finds all cells containing a specific candidate in a given house
+    def get_cells_with_cand_in_house(self, candidate: int, house: int, house_index: int) -> List[Cell]:
+        _cells_with_cand_in_house: List[Cell] = []
+        for cell in self.cells:
+            if cell.position[house] == house_index and candidate in cell.candidates:
+                _cells_with_cand_in_house.append(cell)
+        return _cells_with_cand_in_house
+
     # define a function to remove candidates after x-wings have been found
-    def x_wing_remove(self, house: int, first_position: int, second_position: int):
-        # get the candidate and 2 row or column numbers from the x wing
-        candidate, first_house, second_house = self.single_house_x_wing(house, first_position)[0:3]
+    def x_wing_remove(self, candidate: int, house: int, first_position: int, second_position: int, first_inv_house: int, second_inv_house: int):
         # iterate through all cells
         for cell in self.cells:
             # check if the cell is in the same house outputted by the house function but not in the same house given
-            if cell.position[1 - house] == (first_house or second_house) and cell.position[house] != (
-                    first_position or second_position):
+            if ((cell.position[1 - house] == first_inv_house) or (cell.position[1 - house] == second_inv_house))\
+                    and ((cell.position[house] != first_position) or (cell.position[house] != second_position)):
                 # remove the candidate from the cell and grid graphic
                 cell.candidate_remove(candidate)
 
     # define a recursive function to compare 2 rows or columns to find x-wing pairs
     def x_wing_compare(self, house: int, starting_index: int):
-        # iterate through all the rows below or columns right of the current row or column
-        for position in range(starting_index + 1, 10):
+        _starting_candidate: int = 1
+        while _starting_candidate < 10:
             # check if the candidate and both rows or columns match and have x-wing candidates
-            _starting_x_wing_check = self.single_house_x_wing(house, starting_index, 1)
-            _iterative_position_x_wing_check = self.single_house_x_wing(house, position, 1)
-            # check if no candidates appear twice in either house searched
-            if _starting_x_wing_check is None\
-                    or _iterative_position_x_wing_check is None:
-                # if no candidate was returned, do nothing
-                continue
-            # otherwise, check if the candidate and 2 houses found match
-            elif _starting_x_wing_check[0:3] == _iterative_position_x_wing_check[0:3]:
-                # if they match, call the removal function
-                self.x_wing_remove(house, starting_index, position)
-                break
-            # if candidates were found but didn't match, continue searching through the position's candidates
+            _starting_x_wing_check = self.single_house_x_wing(house, starting_index, _starting_candidate)
+            # check to make sure there is a candidate that exists only twice in a house
+            if _starting_x_wing_check is not None:
+                # iterate through all the rows below or columns right of the current row or column
+                for position in range(starting_index + 1, 10):
+                    # get all the cells in a parallel house with the potential x-wing candidate in the starting check
+                    _second_x_wing_check = self.get_cells_with_cand_in_house(_starting_x_wing_check[0], house, position)
+                    # check if there are only 2 cells in the second house and that the cells are in the same inverse house
+                    if len(_second_x_wing_check) == 2\
+                        and _starting_x_wing_check[1:3] ==\
+                            (_second_x_wing_check[0].position[1 - house], _second_x_wing_check[1].position[1 - house]):
+                        # call the x-wing removal function on the 2 houses
+                        self.x_wing_remove(_starting_x_wing_check[0], house, starting_index, position, _starting_x_wing_check[1], _starting_x_wing_check[2])
+                        break
+                # set the starting candidate to the candidate immediately following the current candidate found
+                _starting_candidate = _starting_x_wing_check[0] + 1
+            # if the x wing does not exist, exit the while loop
             else:
-                # start the search at the next candidate after the one previously found
-                _iterative_position_x_wing_check = self.single_house_x_wing(house, position, _iterative_position_x_wing_check[0] + 1)
-                # TODO: go through the same checks as earlier - abstract that code out?
-        # TODO: before recursing, need to check other candidates in the position's house to see if they only exist twice
-        # TODO: after iterating through the candidates in the position's house, iterate through starting index's candidates
+                break
         # recurse while there is still at least two more rows or columns to compare
         if starting_index < 8:
             # call the function with the same house, but an incremented starting index
