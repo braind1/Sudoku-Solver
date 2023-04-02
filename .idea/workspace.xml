@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Identified problem in x-wing algorithm, needs solving">
+    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Made improvements to x-wing, still needs work">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BrianSudokuSolver.py" beforeDir="false" afterPath="$PROJECT_DIR$/BrianSudokuSolver.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/grid.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,7 +57,7 @@
       <updated>1675908304348</updated>
       <workItem from="1675908305823" duration="66988000" />
       <workItem from="1677166801869" duration="95090000" />
-      <workItem from="1679695296745" duration="15321000" />
+      <workItem from="1679695296745" duration="21778000" />
     </task>
     <task id="LOCAL-00001" summary="Added support for naked trios through naked pair algorithm">
       <created>1677177843328</created>
@@ -198,7 +199,14 @@
       <option name="project" value="LOCAL" />
       <updated>1679710570579</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Made improvements to x-wing, still needs work">
+      <created>1680052885550</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1680052885550</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -236,7 +244,8 @@
     <MESSAGE value="Finished implementation of x-wing technique, needs debugging" />
     <MESSAGE value="X-wing no longer crashes, but solves incorrectly" />
     <MESSAGE value="Identified problem in x-wing algorithm, needs solving" />
-    <option name="LAST_COMMIT_MESSAGE" value="Identified problem in x-wing algorithm, needs solving" />
+    <MESSAGE value="Made improvements to x-wing, still needs work" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made improvements to x-wing, still needs work" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -256,6 +265,6 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/BrianSudokuSolver_py$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1680047445327" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/BrianSudokuSolver_py$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1680402023410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

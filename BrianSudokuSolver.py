@@ -44,13 +44,13 @@ main_widget.setScene(main_scene)
 # simple_grid.simple_solve2()
 
 # instantiate the more difficult sudoku
-# med_grid = Grid(game2, game2_solution)
+# med_grid = Grid(sudoku_game[7], sudoku_game[8])
 # apply the level 2 algorithm to the game
 # med_grid.lev2_solve()
 # med_grid.general_solver()
 
 # instantiate the hard sudoku
-# hard_grid = Grid(game3, game3_solution)
+# hard_grid = Grid(sudoku_game[10], sudoku_game[11])
 # call in general solver
 # hard_grid.general_solver()
 # hard_grid.solve_techniques[0]()

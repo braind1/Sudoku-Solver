@@ -481,7 +481,7 @@ class Grid(QGraphicsRectItem, QObject):
         for cell in self.cells:
             # check if the cell is in the same house outputted by the house function but not in the same house given
             if ((cell.position[1 - house] == first_inv_house) or (cell.position[1 - house] == second_inv_house))\
-                    and ((cell.position[house] != first_position) or (cell.position[house] != second_position)):
+                    and (cell.position[house] != first_position) and (cell.position[house] != second_position):
                 # remove the candidate from the cell and grid graphic
                 cell.candidate_remove(candidate)
 
