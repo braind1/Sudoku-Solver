@@ -445,7 +445,6 @@ class Grid(QGraphicsRectItem, QObject):
         # return the list of cells and their candidates
         return _candidates_in_house
 
-    # TODO: this function needs to be iterable such that if the first candidate found only twice isn't an x-wing, the rest of the candidates are checked
     # define a function that finds the first 2 cells in an x-wing
     def single_house_x_wing(self, house: int, position_of_interest: int, starting_candidate: int) -> tuple[int, int, int, int] or None:
         _cells_and_candidates_in_house: List[Any] = self.shared_house_cand_getter(house, position_of_interest)
@@ -474,6 +473,18 @@ class Grid(QGraphicsRectItem, QObject):
             if cell.position[house] == house_index and candidate in cell.candidates:
                 _cells_with_cand_in_house.append(cell)
         return _cells_with_cand_in_house
+
+    @staticmethod
+    # define a function that finds all the cells containing a specific candidate and candidate length in a cell's shared house
+    def get_cell_with_cand_len_in_shared_house(cell_of_interest: Cell, candidate: int, length: int, house: int) -> List[Cell]:
+        _cells_with_cand_len_in_shared_house: List[Cell] = []
+        # iterate through the cells in the shared house
+        for cell in cell_of_interest.shared_houses[house]:
+            # check if the cell has the candidate and the desired length candidates list
+            if candidate in cell and len(cell.candidates) == length:
+                # add the cell to the list of desired cells
+                _cells_with_cand_len_in_shared_house.append(cell)
+        return _cells_with_cand_len_in_shared_house
 
     # define a function to remove candidates after x-wings have been found
     def x_wing_remove(self, candidate: int, house: int, first_position: int, second_position: int, first_inv_house: int, second_inv_house: int):
@@ -521,7 +532,24 @@ class Grid(QGraphicsRectItem, QObject):
             # call the comparison function
             self.x_wing_compare(house, 1)
 
-    # define a function that performs a function for the maximum number of times it reduces the candidates in the grid
+    # define a function that looks for a single case of the y-wing
+    def y_wing_single_case_cells_list(self, cell_of_interest: Cell, first_cand_house: int, second_cand_house: int) -> List[list[Cell]]:
+        # create a list of the 2 test houses for iteration later
+        _test_houses_list: List[int] = [first_cand_house, second_cand_house]
+        # initialize an empty list of cell lists containing each candidate in the cell of interest
+        _y_wing_candidate_cells: List[list[Cell]] = []
+        # only look for potential y-wings in cells with 2 candidates
+        if len(cell_of_interest.candidates) == 2:
+            # iterate through both candidates in the cell of interest
+            # TODO: make sure this iteration through both the candidates and the houses in parallel works as desired
+            for candidate, house in zip(cell_of_interest.candidates, _test_houses_list):
+                # create a temporary list to store all the cells with a particular candidate
+                _cells_with_cand: List[Cell] = self.get_cell_with_cand_len_in_shared_house(cell_of_interest, candidate, 2, house)
+                # add the list of cells found to list of cell lists
+                _y_wing_candidate_cells.append(_cells_with_cand)
+        return _y_wing_candidate_cells
+
+    # define a recursive function that performs a function for the maximum number of times it reduces the candidates in the grid
     def max_function_iterations(self, functions: List[Callable]):
         # create a variable for the current number of candidates in the grid
         _number_candidates: int = self.candidates_in_grid()
