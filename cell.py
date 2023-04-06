@@ -7,7 +7,6 @@ from PySide6 import QtCore, QtGui
 
 
 class Cell(QGraphicsRectItem):
-
     # create class variables to represent the row and column indexes in the position list
     COL: int = 0
     ROW: int = 1
@@ -78,10 +77,11 @@ class Cell(QGraphicsRectItem):
             _candidate_text_item.setFont(self.candidate_font)
             # map number of the candidate to its position in the cell rectangle item
             _candidate_text_item.setPos(
-                ((candidate - 1) % 3) + ((candidate - 1) % 3) * (3 * self._font_metrics.height() / 2) +
-                (1 / 4) * self._font_metrics.height(),
-                ((candidate - 1) // 3) + ((candidate - 1) // 3) * (3 * self._font_metrics.height() / 2) +
-                (1 / 4) * self._font_metrics.height())
+                    ((candidate - 1) % 3) + ((candidate - 1) % 3) * (3 * self._font_metrics.height() / 2) +
+                    (1 / 4) * self._font_metrics.height(),
+                    ((candidate - 1) // 3) + ((candidate - 1) // 3) * (3 * self._font_metrics.height() / 2) +
+                    (1 / 4) * self._font_metrics.height()
+                )
             # add the current text item to the list of candidate text items
             self.display_candidates.append(_candidate_text_item)
 
@@ -152,3 +152,12 @@ class Cell(QGraphicsRectItem):
             self.candidates.remove(candidate)
             # hide the corresponding text item
             self.display_candidates[candidate - 1].hide()
+
+    # define a function to show only the candidates that a cell has
+    def set_candidates(self, candidates_list: List[int]):
+        self.candidates = candidates_list
+        self.candidates.sort()
+        # Now show/hide the text.
+        for candidate in range(1, 10):
+            if candidate not in self.candidates:
+                self.display_candidates[candidate - 1].hide()

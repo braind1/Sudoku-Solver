@@ -1,4 +1,5 @@
 # This file contains the entire grid class
+import math
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsLineItem
 from typing import Any, Callable, List
 from cell import Cell
@@ -28,7 +29,8 @@ class Grid(QGraphicsRectItem, QObject):
             self.naked_pair_full_grid,
             self.pointing_pairs_full_grid,
             self.bi_value_graveyard,
-            self.x_wing
+            self.x_wing,
+            self.y_wing
         ]
         # create a variable to track the number of times a solving technique was used
         self.num_iterations: int = 0
@@ -274,7 +276,7 @@ class Grid(QGraphicsRectItem, QObject):
         if len(cell_of_interest.candidates) == 2 and cell_of_interest.candidates in _temp_shared_house_candidates:
             # remove the candidates from all cells containing those candidates except the other cell with the same candidates list
             self.naked_pair_candidate_removal(cell_of_interest, attr)
-        elif len(cell_of_interest.candidates) == 3\
+        elif len(cell_of_interest.candidates) == 3 \
                 and _temp_shared_house_candidates.count(cell_of_interest.candidates) == 2:
             # removes the candidates from all cells containing those candidates except the 2 other cells with the same candidates lists
             self.naked_pair_candidate_removal(cell_of_interest, attr)
@@ -285,7 +287,8 @@ class Grid(QGraphicsRectItem, QObject):
         # iterates for all test cells in the shared house
         for test_cell in cell_of_interest.shared_houses[attr]:
             # checks if the test cell isn't the cell of interest and the test cell isn't the naked pair
-            if test_cell is not cell_of_interest and test_cell.candidates != cell_of_interest.candidates:
+            if test_cell is not cell_of_interest and test_cell.candidates != cell_of_interest.candidates\
+                    and len(test_cell.candidates) > 0:
                 # sets the test cell's candidates to the remaining candidates after removing the cell of interest's candidates
                 test_cell.candidates = list(set(test_cell.candidates).difference(cell_of_interest.candidates))
                 # order the candidates in case the set takes them out of order
@@ -309,7 +312,8 @@ class Grid(QGraphicsRectItem, QObject):
     # define a function that generates the 2 lists necessary for the pointing pairs algorithm (works for all 4 cases)
     # the outer and inner house ints are the indexes of the shared attribute in the cell's shared house list
     # the return lists contain the all the candidates in both houses, and the candidates in the outer but not the inner house
-    def pointing_pairs_base_list(cell_of_interest: Cell, outside_house: int, inside_house: int) -> (List[int], List[int]):
+    def pointing_pairs_base_list(cell_of_interest: Cell, outside_house: int, inside_house: int) ->\
+            (List[int], List[int]):
         # define 2 temporary lists of candidates to determine if a candidate is a pointing pair
         _2_shared_houses_candidates_list: List[int] = []
         _only_outer_house_candidates_list: List[int] = []
@@ -446,7 +450,8 @@ class Grid(QGraphicsRectItem, QObject):
         return _candidates_in_house
 
     # define a function that finds the first 2 cells in an x-wing
-    def single_house_x_wing(self, house: int, position_of_interest: int, starting_candidate: int) -> tuple[int, int, int, int] or None:
+    def single_house_x_wing(self, house: int, position_of_interest: int, starting_candidate: int) -> \
+            tuple[int, int, int, int] or None:
         _cells_and_candidates_in_house: List[Any] = self.shared_house_cand_getter(house, position_of_interest)
         # look through all potential candidates to find a candidate that only appears twice in a column
         for candidate in range(starting_candidate, 10):
@@ -461,7 +466,7 @@ class Grid(QGraphicsRectItem, QObject):
             # check how many cells contain the candidate
             if len(_cells_with_candidates) == 2:
                 # if there are only 2 cells, return the candidate and the row or column (inverse of given house) of the 2 cells
-                return candidate, _cells_with_candidates[0].position[1 - house],\
+                return candidate, _cells_with_candidates[0].position[1 - house], \
                     _cells_with_candidates[1].position[1 - house], position_of_interest
         # if no candidates appear only twice, return nothing
         return None
@@ -476,22 +481,44 @@ class Grid(QGraphicsRectItem, QObject):
 
     @staticmethod
     # define a function that finds all the cells containing a specific candidate and candidate length in a cell's shared house
-    def get_cell_with_cand_len_in_shared_house(cell_of_interest: Cell, candidate: int, length: int, house: int) -> List[Cell]:
+    def get_cell_with_cand_len_in_shared_house(cell_of_interest: Cell, candidate: int, length: int, house: int) -> \
+            List[Cell]:
         _cells_with_cand_len_in_shared_house: List[Cell] = []
         # iterate through the cells in the shared house
         for cell in cell_of_interest.shared_houses[house]:
             # check if the cell has the candidate and the desired length candidates list
-            if candidate in cell and len(cell.candidates) == length:
+            if candidate in cell.candidates and\
+                    len(cell.candidates) == length and cell is not cell_of_interest and cell.candidates != cell_of_interest.candidates:
                 # add the cell to the list of desired cells
                 _cells_with_cand_len_in_shared_house.append(cell)
         return _cells_with_cand_len_in_shared_house
 
+    @staticmethod
+    # define a function that finds all the cells visible to 2 input cells
+    def get_cells_visible_to_2_cells(cell_1: Cell, cell_2: Cell) -> List[Cell]:
+        # create an empty list of all cells visible to the first cell
+        _all_cells_seen_by_cell_1: List[Cell] = []
+        # initialize the list of all cells visible to both cells
+        _all_cells_visible_to_both: List[Cell] = []
+        # iterate through the 3 lists in the 1 cell's shared houses
+        for shared_house_list in cell_1.shared_houses:
+            # extend the list of all cells seen by cell 1
+            _all_cells_seen_by_cell_1.extend(shared_house_list)
+        # iterate through all the cells seen by cell 1 to see if cell 2 can see them
+        for cell in _all_cells_seen_by_cell_1:
+            # check if the cell is in any of cell 2's shared houses
+            if any(cell in single_shared_house for single_shared_house in cell_2.shared_houses):
+                # append that cell to the list of all cells visible to both
+                _all_cells_visible_to_both.append(cell)
+        return _all_cells_visible_to_both
+
     # define a function to remove candidates after x-wings have been found
-    def x_wing_remove(self, candidate: int, house: int, first_position: int, second_position: int, first_inv_house: int, second_inv_house: int):
+    def x_wing_remove(self, candidate: int, house: int, first_position: int, second_position: int, first_inv_house: int,
+                      second_inv_house: int):
         # iterate through all cells
         for cell in self.cells:
             # check if the cell is in the same house outputted by the house function but not in the same house given
-            if ((cell.position[1 - house] == first_inv_house) or (cell.position[1 - house] == second_inv_house))\
+            if ((cell.position[1 - house] == first_inv_house) or (cell.position[1 - house] == second_inv_house)) \
                     and (cell.position[house] != first_position) and (cell.position[house] != second_position):
                 # remove the candidate from the cell and grid graphic
                 cell.candidate_remove(candidate)
@@ -509,11 +536,12 @@ class Grid(QGraphicsRectItem, QObject):
                     # get all the cells in a parallel house with the potential x-wing candidate in the starting check
                     _second_x_wing_check = self.get_cells_with_cand_in_house(_starting_x_wing_check[0], house, position)
                     # check if there are only 2 cells in the second house and that the cells are in the same inverse house
-                    if len(_second_x_wing_check) == 2\
-                        and _starting_x_wing_check[1:3] ==\
+                    if len(_second_x_wing_check) == 2 \
+                            and _starting_x_wing_check[1:3] == \
                             (_second_x_wing_check[0].position[1 - house], _second_x_wing_check[1].position[1 - house]):
                         # call the x-wing removal function on the 2 houses
-                        self.x_wing_remove(_starting_x_wing_check[0], house, starting_index, position, _starting_x_wing_check[1], _starting_x_wing_check[2])
+                        self.x_wing_remove(_starting_x_wing_check[0], house, starting_index, position,
+                                           _starting_x_wing_check[1], _starting_x_wing_check[2])
                         break
                 # set the starting candidate to the candidate immediately following the current candidate found
                 _starting_candidate = _starting_x_wing_check[0] + 1
@@ -533,7 +561,8 @@ class Grid(QGraphicsRectItem, QObject):
             self.x_wing_compare(house, 1)
 
     # define a function that looks for a single case of the y-wing
-    def y_wing_single_case_cells_list(self, cell_of_interest: Cell, first_cand_house: int, second_cand_house: int) -> List[list[Cell]]:
+    def y_wing_single_case_cells_list(self, cell_of_interest: Cell, first_cand_house: int, second_cand_house: int) -> \
+            List[list[Cell]]:
         # create a list of the 2 test houses for iteration later
         _test_houses_list: List[int] = [first_cand_house, second_cand_house]
         # initialize an empty list of cell lists containing each candidate in the cell of interest
@@ -541,13 +570,64 @@ class Grid(QGraphicsRectItem, QObject):
         # only look for potential y-wings in cells with 2 candidates
         if len(cell_of_interest.candidates) == 2:
             # iterate through both candidates in the cell of interest
-            # TODO: make sure this iteration through both the candidates and the houses in parallel works as desired
             for candidate, house in zip(cell_of_interest.candidates, _test_houses_list):
                 # create a temporary list to store all the cells with a particular candidate
-                _cells_with_cand: List[Cell] = self.get_cell_with_cand_len_in_shared_house(cell_of_interest, candidate, 2, house)
+                _cells_with_cand: List[Cell] =\
+                    self.get_cell_with_cand_len_in_shared_house(cell_of_interest, candidate, 2, house)
                 # add the list of cells found to list of cell lists
                 _y_wing_candidate_cells.append(_cells_with_cand)
         return _y_wing_candidate_cells
+
+    # define a function that evaluates if a cell has a y-wing
+    def y_wing_single_case(self, cell_of_interest: Cell, first_cand_house: int, second_cand_house: int):
+        # get the list of cell lists that are potential y-wings
+        _y_wing_candidate_cells: List[list[Cell]] =\
+            self.y_wing_single_case_cells_list(cell_of_interest, first_cand_house, second_cand_house)
+        # check to make sure that the y-wing found potential cells to work with
+        _potential_y_wings_exist: bool = True
+        if len(_y_wing_candidate_cells) == 0 or len(_y_wing_candidate_cells[0]) == 0 or len(_y_wing_candidate_cells[1]) == 0:
+            _potential_y_wings_exist = False
+        # after checking that at least 2 cells were found, make sure neither cell shares any houses (row, column, or block)
+        elif _y_wing_candidate_cells[0][0].position[0] == _y_wing_candidate_cells[1][0].position[0] \
+                or _y_wing_candidate_cells[0][0].position[1] == _y_wing_candidate_cells[1][0].position[1] \
+                or _y_wing_candidate_cells[0][0].block == _y_wing_candidate_cells[1][0].block:
+            _potential_y_wings_exist = False
+        if _potential_y_wings_exist:
+            # iterate through the first list outside
+            for cell_in_first_house in _y_wing_candidate_cells[0]:
+                # iterate through the second list inside
+                for cell_in_second_house in _y_wing_candidate_cells[1]:
+                    # check if the 2 test cells have an intersecting candidate (will be the 3rd y-wing candidate)
+                    if len(set(cell_in_first_house.candidates).intersection(set(cell_in_second_house.candidates))) == 1:
+                        # get all the cells visible to both y wing cells (not the hinge cell)
+                        _all_cells_visible_to_both =\
+                            self.get_cells_visible_to_2_cells(cell_in_first_house, cell_in_second_house)
+                        # once all the cells to eliminate the y wing candidate are found, iterate through and apply the candidate removal method
+                        for cell in _all_cells_visible_to_both:
+                            # remove the y wing candidate (only element of the intersected candidate sets) from the cell
+                            cell.candidate_remove(list(set(cell_in_first_house.candidates).intersection(set(cell_in_second_house.candidates)))[0])
+
+    # define a function that iterates through all 6 variations of the y-wing
+    def y_wing_full_cell(self, cell_of_interest: Cell):
+        # this mapping works for the first 3 variations
+        for variation in range(3):
+            # call the single variation function with the mapped variables
+            self.y_wing_single_case(cell_of_interest, (variation // 2),
+                                    math.ceil(1.2 * math.sin(2.54 * variation - 0.087) + 1))
+        # this mapping works for the last 3 variations
+        for variation in range(3, 6):
+            # call the single variation function with the mapped variables
+            self.y_wing_single_case(cell_of_interest, (variation // 2),
+                                    math.floor(1.2 * math.sin(2.54 * variation - 0.087) + 1))
+
+    # define the full y-wing technique
+    def y_wing(self):
+        # iterate through all cells in the grid
+        for cell in self.cells:
+            # check if the test cell has candidates
+            if len(cell.candidates) > 0:
+                # call the full cell method on the cell if it has candidates
+                self.y_wing_full_cell(cell)
 
     # define a recursive function that performs a function for the maximum number of times it reduces the candidates in the grid
     def max_function_iterations(self, functions: List[Callable]):

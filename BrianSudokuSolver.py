@@ -28,7 +28,7 @@ main_window.addToolBar(toolbar)
 # create the button and make it belong to the toolbar
 button: QAction = QAction(toolbar)
 # set the text for the button
-button.setText('Next>')
+button.setText('Solve')
 # add the button to the toolbar
 toolbar.addAction(button)
 # make the main widget the 'central' widget
