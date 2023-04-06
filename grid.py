@@ -285,10 +285,10 @@ class Grid(QGraphicsRectItem, QObject):
     # define a function that removes the cell of interest's candidates from all cells in the shared house
     def naked_pair_candidate_removal(cell_of_interest: Cell, attr: int):
         # iterates for all test cells in the shared house
-        for test_cell in cell_of_interest.shared_houses[attr]:
+        for cell in cell_of_interest.shared_houses[attr]:
             # checks if the test cell isn't the cell of interest and the test cell isn't the naked pair
-            if test_cell is not cell_of_interest and test_cell.candidates != cell_of_interest.candidates\
-                    and len(test_cell.candidates) > 0:
+            if cell is not cell_of_interest and cell.candidates != cell_of_interest.candidates\
+                    and len(cell.candidates) > 0:
                 # sets the test cell's candidates to the remaining candidates after removing the cell of interest's candidates
                 test_cell.candidates = list(set(test_cell.candidates).difference(cell_of_interest.candidates))
                 # order the candidates in case the set takes them out of order
