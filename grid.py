@@ -290,9 +290,7 @@ class Grid(QGraphicsRectItem, QObject):
             if cell is not cell_of_interest and cell.candidates != cell_of_interest.candidates\
                     and len(cell.candidates) > 0:
                 # sets the test cell's candidates to the remaining candidates after removing the cell of interest's candidates
-                test_cell.candidates = list(set(test_cell.candidates).difference(cell_of_interest.candidates))
-                # order the candidates in case the set takes them out of order
-                test_cell.candidates.sort()
+                cell.set_candidates(list(set(cell.candidates).difference(cell_of_interest.candidates)))
 
     # define a function that repeats the naked pair check for all shared houses
     def naked_pair_full_house(self, cell_of_interest: Cell):
