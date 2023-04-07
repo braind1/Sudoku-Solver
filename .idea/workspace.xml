@@ -4,15 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Added 1st function y-wing technique">
+    <list default="true" id="6c858a89-5ef6-430c-927c-5056bbc9e64d" name="Changes" comment="Finished y-wing implementation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BrianSudokuSolver.py" beforeDir="false" afterPath="$PROJECT_DIR$/BrianSudokuSolver.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cell.py" beforeDir="false" afterPath="$PROJECT_DIR$/cell.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/grid.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sudoku_game.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sudoku_game.txt" afterDir="false" />
     </list>
-    <list id="b9df1585-c333-4c23-9d80-1ce0d9b4dba5" name="Changes by mdurland" comment="">
-      <change beforePath="$PROJECT_DIR$/grid.py" beforeDir="false" afterPath="$PROJECT_DIR$/grid.py" afterDir="false" />
-    </list>
+    <list id="b9df1585-c333-4c23-9d80-1ce0d9b4dba5" name="Changes by mdurland" comment="Changes by mdurland" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,31 +24,6 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="LineStatusTrackerManager">
-    <file path="$PROJECT_DIR$/grid.py">
-      <ranges>
-        <range start1="1" end1="1" start2="1" end2="2" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="30" end1="31" start2="31" end2="33" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="276" end1="277" start2="278" end2="279" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="287" end1="288" start2="289" end2="291" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="289" end1="292" start2="292" end2="293" changelist="b9df1585-c333-4c23-9d80-1ce0d9b4dba5" />
-        <range start1="311" end1="312" start2="312" end2="314" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="448" end1="449" start2="450" end2="452" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="463" end1="464" start2="466" end2="467" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="478" end1="479" start2="481" end2="483" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="483" end1="484" start2="487" end2="489" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="487" end1="487" start2="492" end2="511" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="489" end1="490" start2="513" end2="515" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="493" end1="494" start2="518" end2="519" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="511" end1="513" start2="536" end2="538" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="515" end1="516" start2="540" end2="542" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="535" end1="536" start2="561" end2="563" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="543" end1="544" start2="570" end2="570" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="546" end1="547" start2="572" end2="574" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-        <range start1="550" end1="550" start2="577" end2="628" changelist="6c858a89-5ef6-430c-927c-5056bbc9e64d" />
-      </ranges>
-    </file>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -86,7 +58,7 @@
       <updated>1675908304348</updated>
       <workItem from="1675908305823" duration="66988000" />
       <workItem from="1677166801869" duration="95090000" />
-      <workItem from="1679695296745" duration="44039000" />
+      <workItem from="1679695296745" duration="47444000" />
     </task>
     <task id="LOCAL-00001" summary="Added support for naked trios through naked pair algorithm">
       <created>1677177843328</created>
@@ -249,7 +221,28 @@
       <option name="project" value="LOCAL" />
       <updated>1680494485232</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Finished y-wing implementation">
+      <created>1680798803463</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1680798803463</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Finished y-wing implementation">
+      <created>1680798862400</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1680798862400</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Changes by mdurland">
+      <created>1680798918836</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1680798918836</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -290,7 +283,9 @@
     <MESSAGE value="Made improvements to x-wing, still needs work" />
     <MESSAGE value="Fixed the x-wing technique" />
     <MESSAGE value="Added 1st function y-wing technique" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added 1st function y-wing technique" />
+    <MESSAGE value="Finished y-wing implementation" />
+    <MESSAGE value="Changes by mdurland" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes by mdurland" />
   </component>
   <component name="XDebuggerManager">
     <watches-manager>
@@ -300,6 +295,6 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/BrianSudokuSolver_py$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1680748493063" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/BrianSudokuSolver_py$BrianSudokuSolver.coverage" NAME="BrianSudokuSolver Coverage Results" MODIFIED="1680820361756" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

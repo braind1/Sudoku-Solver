@@ -62,7 +62,7 @@ main_widget.setScene(main_scene)
 # tough_grid.general_solver()
 
 # instantiate the tougher sudoku
-tougher_grid = Grid(sudoku_game[1], sudoku_game[2])
+tougher_grid = Grid(sudoku_game[37], sudoku_game[20])
 # call in general solver
 # tougher_grid.general_solver()
 button.triggered.connect(tougher_grid.on_next_button_clicked)
