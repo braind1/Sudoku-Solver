@@ -38,33 +38,9 @@ main_scene = QGraphicsScene(main_window)
 # tell the widget that the scene exists
 main_widget.setScene(main_scene)
 
-# instantiate the only instance of the grid
-# simple_grid = Grid(game1, game1_solution)
-# solves the full simple grid
-# simple_grid.simple_solve2()
-
-# instantiate the more difficult sudoku
-# med_grid = Grid(sudoku_game[7], sudoku_game[8])
-# apply the level 2 algorithm to the game
-# med_grid.lev2_solve()
-# med_grid.general_solver()
-
-# instantiate the hard sudoku
-# hard_grid = Grid(sudoku_game[10], sudoku_game[11])
-# call in general solver
-# hard_grid.general_solver()
-# hard_grid.solve_techniques[0]()
-# hard_grid.solution_print()
-
-# instantiate the tough sudoku
-# tough_grid = Grid(game4, game4_solution)
-# call in general solver
-# tough_grid.general_solver()
-
 # instantiate the tougher sudoku
-tougher_grid = Grid(sudoku_game[37], sudoku_game[20])
+tougher_grid = Grid(sudoku_game[13], sudoku_game[14])
 # call in general solver
-# tougher_grid.general_solver()
 button.triggered.connect(tougher_grid.on_next_button_clicked)
 
 # add the grid to the scene
@@ -75,4 +51,3 @@ main_window.show()
 # execute the app code
 sudoku_app.exec()
 
-# TODO: incorporate map, filter, and reduce in places where they are relevant make the code more efficient
